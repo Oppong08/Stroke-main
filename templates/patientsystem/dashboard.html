@@ -4,20 +4,205 @@
 {% block title %}Dashboard - Stroke Unit System{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-8">
-        <h2 class="mb-0">Patient Dashboard</h2>
-        <p class="text-muted">Welcome back, {{ user.username }}</p>
-    </div>
-    <div class="col-md-4">
-        <div class="card bg-primary text-white">
+<div class="mb-4">
+    <h2 class="mb-0">Remote Neurologist Dashboard</h2>
+    <p class="text-muted">Welcome back, Dr. {{ user.username }}</p>
+</div>
+
+<!-- Metrics/Overview Cards -->
+<div class="row mb-5">
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
             <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="card-title mb-0">Total Patients</h6>
-                        <h2 class="mb-0">{{ patients|length }}</h2>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="card-icon-circle bg-primary-light">
+                        <i class="fas fa-user-injured text-primary"></i>
                     </div>
-                    <i class="fas fa-users fa-2x"></i>
+                    <span class="badge bg-primary-light text-primary">Today</span>
+                </div>
+                <h5 class="card-title">Total Patients</h5>
+                <h2 class="mb-0 display-5 fw-bold">{{ patients|length }}</h2>
+                <p class="text-muted mb-0 mt-2">
+                    <i class="fas fa-arrow-up me-1 text-success"></i>
+                    <span class="text-success fw-medium">+12%</span> from last week
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="card-icon-circle bg-danger-light">
+                        <i class="fas fa-heartbeat text-danger"></i>
+                    </div>
+                    <span class="badge bg-danger-light text-danger">Critical</span>
+                </div>
+                <h5 class="card-title">Stroke Alerts</h5>
+                <h2 class="mb-0 display-5 fw-bold">4</h2>
+                <p class="text-muted mb-0 mt-2">
+                    <i class="fas fa-arrow-up me-1 text-danger"></i>
+                    <span class="text-danger fw-medium">+3</span> new alerts today
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="card-icon-circle bg-success-light">
+                        <i class="fas fa-stethoscope text-success"></i>
+                    </div>
+                    <span class="badge bg-success-light text-success">Active</span>
+                </div>
+                <h5 class="card-title">Consultations</h5>
+                <h2 class="mb-0 display-5 fw-bold">12</h2>
+                <p class="text-muted mb-0 mt-2">
+                    <i class="fas fa-arrow-down me-1 text-success"></i>
+                    <span class="text-success fw-medium">-8%</span> from yesterday
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="card-icon-circle bg-warning-light">
+                        <i class="fas fa-file-medical-alt text-warning"></i>
+                    </div>
+                    <span class="badge bg-warning-light text-warning">Pending</span>
+                </div>
+                <h5 class="card-title">Test Results</h5>
+                <h2 class="mb-0 display-5 fw-bold">7</h2>
+                <p class="text-muted mb-0 mt-2">
+                    <i class="fas fa-arrow-up me-1 text-success"></i>
+                    <span class="text-success fw-medium">+2</span> new results
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Alerts Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary-gradient text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bell me-2"></i>Recent Alerts
+                    </h5>
+                    <a href="{% url 'patientsystem:alerts' %}" class="btn btn-sm btn-light">
+                        View All Alerts
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="alert-list">
+                    <!-- Critical Alert -->
+                    <div class="alert-item alert-danger">
+                        <div class="row align-items-center g-0">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <div class="alert-icon-wrapper me-3">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="alert-title mb-1">SEVERE STROKE ALERT: NIHSS score 18 indicates major stroke. Immediate intervention required.</h6>
+                                        <p class="alert-info mb-0">Patient ID: 48</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-md-center py-2 py-md-0">
+                                <span class="alert-time">2025-04-29 01:25</span>
+                            </div>
+                            <div class="col-md-2 text-md-end py-2 py-md-0">
+                                <a href="#" class="btn btn-sm btn-outline-primary view-patient-btn">
+                                    <i class="fas fa-eye me-1"></i>View Patient
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Warning Alert -->
+                    <div class="alert-item alert-warning">
+                        <div class="row align-items-center g-0">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <div class="alert-icon-wrapper me-3">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="alert-title mb-1">ELEVATED BLOOD GLUCOSE: 196 mg/dL. Monitor for hyperglycemia.</h6>
+                                        <p class="alert-info mb-0">Patient ID: 47</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-md-center py-2 py-md-0">
+                                <span class="alert-time">2025-04-29 01:25</span>
+                            </div>
+                            <div class="col-md-2 text-md-end py-2 py-md-0">
+                                <a href="#" class="btn btn-sm btn-outline-primary view-patient-btn">
+                                    <i class="fas fa-eye me-1"></i>View Patient
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Critical Alert -->
+                    <div class="alert-item alert-danger">
+                        <div class="row align-items-center g-0">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <div class="alert-icon-wrapper me-3">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="alert-title mb-1">SEVERE STROKE ALERT: NIHSS score 12 indicates major stroke. Immediate intervention required.</h6>
+                                        <p class="alert-info mb-0">Patient ID: 46</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-md-center py-2 py-md-0">
+                                <span class="alert-time">2025-04-29 01:25</span>
+                            </div>
+                            <div class="col-md-2 text-md-end py-2 py-md-0">
+                                <a href="#" class="btn btn-sm btn-outline-primary view-patient-btn">
+                                    <i class="fas fa-eye me-1"></i>View Patient
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Critical Alert -->
+                    <div class="alert-item alert-danger">
+                        <div class="row align-items-center g-0">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <div class="alert-icon-wrapper me-3">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="alert-title mb-1">SEVERE STROKE ALERT: NIHSS score 15 indicates major stroke. Immediate intervention required.</h6>
+                                        <p class="alert-info mb-0">Patient ID: 45</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-md-center py-2 py-md-0">
+                                <span class="alert-time">2025-04-29 01:25</span>
+                            </div>
+                            <div class="col-md-2 text-md-end py-2 py-md-0">
+                                <a href="#" class="btn btn-sm btn-outline-primary view-patient-btn">
+                                    <i class="fas fa-eye me-1"></i>View Patient
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -26,9 +211,26 @@
 
 <!-- Patient List Section -->
 <div class="row mb-5">
+    <div class="col-12 mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Patient List</h4>
+            <div class="d-flex">
+                <div class="input-group me-2">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="fas fa-search text-muted"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0" placeholder="Search patients...">
+                </div>
+                <button class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add Patient
+                </button>
+            </div>
+        </div>
+    </div>
+    
     {% for patient in patients %}
     <div class="col-md-6 col-lg-4 mb-4">
-        <div class="card h-100 shadow-sm">
+        <div class="card h-100 shadow-sm border-0 patient-card">
             <div class="card-header bg-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">{{ patient.name }}</h5>
@@ -60,7 +262,7 @@
     </div>
     {% empty %}
     <div class="col-12">
-        <div class="card shadow-sm">
+        <div class="card shadow-sm border-0">
             <div class="card-body text-center py-5">
                 <i class="fas fa-user-injured fa-3x text-muted mb-3"></i>
                 <h4 class="text-muted">No patients found</h4>
@@ -69,55 +271,5 @@
         </div>
     </div>
     {% endfor %}
-</div>
-
-<!-- Active Alerts Section -->
-<div class="row">
-    <div class="col-12">
-        <div class="card shadow-sm">
-            <div class="card-header bg-white">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-bell me-2 text-warning"></i>Active Alerts
-                </h5>
-            </div>
-            <div class="card-body">
-                {% for patient in patients %}
-                    {% with active_alerts=patient.alerts.filter.acknowledged=False %}
-                    {% if active_alerts %}
-                    <div class="alert-card mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="mb-0">
-                                <i class="fas fa-user me-2"></i>{{ patient.name }}
-                                <small class="text-muted">(ID: {{ patient.hospital_id }})</small>
-                            </h6>
-                        </div>
-                        <div class="list-group">
-                            {% for alert in active_alerts %}
-                            <div class="list-group-item list-group-item-action {% if alert.type == 'critical' %}list-group-item-danger{% else %}list-group-item-warning{% endif %}">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1">
-                                        <i class="fas fa-exclamation-circle me-2"></i>{{ alert.get_type_display }}
-                                    </h6>
-                                    <small>{{ alert.timestamp|date:"H:i" }}</small>
-                                </div>
-                                <p class="mb-1">{{ alert.description }}</p>
-                                {% if not user.userprofile.role == 'technician' %}
-                                <form method="post" action="{% url 'patientsystem:acknowledge_alert' alert.id %}" class="mt-2">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-outline-light">
-                                        <i class="fas fa-check me-1"></i>Acknowledge
-                                    </button>
-                                </form>
-                                {% endif %}
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% endwith %}
-                {% endfor %}
-            </div>
-        </div>
-    </div>
 </div>
 {% endblock %} 

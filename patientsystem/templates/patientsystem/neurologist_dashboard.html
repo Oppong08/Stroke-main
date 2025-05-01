@@ -1,87 +1,175 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Neurologist Dashboard - Stroke Unit System{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/neurologist-dashboard.css' %}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2>Remote Neurologist Dashboard</h2>
-    
-    <!-- Recent Alerts Section -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4>Recent Alerts</h4>
-                    <a href="{% url 'patientsystem:alerts' %}" class="btn btn-primary">View All Alerts</a>
-                </div>
-                <div class="card-body">
-                    {% if alerts %}
-                        <div class="list-group">
-                            {% for alert in alerts %}
-                            <div class="list-group-item list-group-item-action {% if alert.type == 'critical' %}list-group-item-danger{% else %}list-group-item-warning{% endif %}">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h5 class="mb-1">{{ alert.description }}</h5>
-                                    <small>{{ alert.timestamp|date:"Y-m-d H:i" }}</small>
-                                </div>
-                                <p class="mb-1">Patient ID: {{ alert.patient_id }}</p>
-                                <a href="{% url 'patientsystem:patient_detail' alert.patient_id %}" class="btn btn-sm btn-primary">View Patient</a>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="text-center">No recent alerts</p>
-                    {% endif %}
-                </div>
+<div class="neurologist-dashboard">
+    <div class="dashboard-header">
+        <h2>Remote Neurologist Dashboard</h2>
+        <div class="header-actions">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search patients...">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+            <div class="date-filter">
+                <i class="far fa-calendar-alt"></i>
+                <span>Today</span>
+                <i class="fas fa-chevron-down"></i>
             </div>
         </div>
     </div>
-
-    <!-- Patient List Section -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4>Patient List</h4>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Age</th>
-                                    <th>Sex</th>
-                                    <th>NIHSS Score</th>
-                                    <th>Last Consultation</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for patient in patients %}
-                                <tr>
-                                    <td>{{ patient.id }}</td>
-                                    <td>{{ patient.name }}</td>
-                                    <td>{{ patient.age }}</td>
-                                    <td>{{ patient.sex }}</td>
-                                    <td>
-                                        <span class="badge {% if patient.nihss_score > 15 %}bg-danger{% elif patient.nihss_score > 5 %}bg-warning{% else %}bg-success{% endif %}">
-                                            {{ patient.nihss_score }}
-                                        </span>
-                                    </td>
-                                    <td>{{ patient.nihss_last_updated|date:"Y-m-d H:i" }}</td>
-                                    <td>
-                                        <a href="{% url 'patientsystem:patient_detail' patient.id %}" class="btn btn-sm btn-info">View</a>
-                                        <a href="{% url 'patientsystem:new_consultation' patient.id %}" class="btn btn-sm btn-success">New Consultation</a>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="7" class="text-center">No patients found</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+    
+    <!-- Dashboard Summary Cards -->
+    <div class="dashboard-summary">
+        <div class="summary-card patients-card">
+            <div class="card-icon">
+                <i class="fas fa-user-injured"></i>
+            </div>
+            <div class="card-content">
+                <h3>Total Patients</h3>
+                <p class="card-value">{{ patients|length }}</p>
+            </div>
+        </div>
+        
+        <div class="summary-card alerts-card">
+            <div class="card-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="card-content">
+                <h3>Critical Alerts</h3>
+                <p class="card-value">{{ alerts|length }}</p>
+            </div>
+        </div>
+        
+        <div class="summary-card consultations-card">
+            <div class="card-icon">
+                <i class="fas fa-stethoscope"></i>
+            </div>
+            <div class="card-content">
+                <h3>Consultations</h3>
+                <p class="card-value">12</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content Area -->
+    <div class="dashboard-content">
+        <!-- Recent Alerts Section -->
+        <div class="alerts-section dashboard-card">
+            <div class="section-header">
+                <h3><i class="fas fa-bell"></i> Recent Alerts</h3>
+                <a href="{% url 'patientsystem:alerts' %}" class="view-all-link">View All <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="section-content">
+                {% if alerts %}
+                    <div class="alerts-list">
+                        {% for alert in alerts %}
+                        <div class="alert-item {% if alert.type == 'critical' %}critical-alert{% else %}warning-alert{% endif %}">
+                            <div class="alert-icon">
+                                {% if alert.type == 'critical' %}
+                                <i class="fas fa-exclamation-circle"></i>
+                                {% else %}
+                                <i class="fas fa-exclamation-triangle"></i>
+                                {% endif %}
+                            </div>
+                            <div class="alert-details">
+                                <div class="alert-info">
+                                    <h4>{{ alert.description }}</h4>
+                                    <span class="alert-time">{{ alert.timestamp|date:"Y-m-d H:i" }}</span>
+                                </div>
+                                <div class="alert-meta">
+                                    <span class="patient-id"><i class="fas fa-id-card"></i> Patient ID: {{ alert.patient_id }}</span>
+                                    <a href="{% url 'patientsystem:patient_detail' alert.patient_id %}" class="view-patient-btn">
+                                        View Patient <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <p>No recent alerts</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Patient List Section -->
+        <div class="patients-section dashboard-card">
+            <div class="section-header">
+                <h3><i class="fas fa-users"></i> Patient List</h3>
+                <div class="table-actions">
+                    <div class="table-filter">
+                        <span>Filter by:</span>
+                        <select class="filter-select">
+                            <option value="all">All Patients</option>
+                            <option value="critical">Critical NIHSS</option>
+                            <option value="recent">Recent Consultations</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="responsive-table">
+                    <table class="patients-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Sex</th>
+                                <th>NIHSS Score</th>
+                                <th>Last Consultation</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for patient in patients %}
+                            <tr>
+                                <td class="patient-id">{{ patient.id }}</td>
+                                <td class="patient-name">{{ patient.name }}</td>
+                                <td>{{ patient.age }}</td>
+                                <td>
+                                    <span class="gender-badge {% if patient.sex == 'Male' %}male{% else %}female{% endif %}">
+                                        {{ patient.sex }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="nihss-score {% if patient.nihss_score > 15 %}critical{% elif patient.nihss_score > 5 %}warning{% else %}normal{% endif %}">
+                                        {{ patient.nihss_score }}
+                                    </div>
+                                </td>
+                                <td>{{ patient.nihss_last_updated|date:"Y-m-d H:i" }}</td>
+                                <td class="actions-cell">
+                                    <div class="table-actions">
+                                        <a href="{% url 'patientsystem:patient_detail' patient.id %}" class="action-btn view-btn" title="View Patient">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'patientsystem:new_consultation' patient.id %}" class="action-btn consult-btn" title="New Consultation">
+                                            <i class="fas fa-stethoscope"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="empty-table">
+                                    <div class="empty-state">
+                                        <i class="fas fa-user-injured"></i>
+                                        <p>No patients found</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

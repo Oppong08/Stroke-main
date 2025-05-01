@@ -1,0 +1,315 @@
+/* Consultation Form Styles */
+/* Matching the modern design of the patient detail page */
+
+.consultation-container {
+    padding: 25px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Page Header */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.page-header h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0;
+}
+
+.patient-id-badge {
+    background-color: #f0f9ff;
+    color: #0369a1;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-left: 10px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Form Layout */
+.consultation-layout {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 25px;
+}
+
+/* Card Styling */
+.form-card {
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    margin-bottom: 25px;
+}
+
+.card-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: white;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.card-header i {
+    color: var(--primary-color);
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Form Sections */
+.form-section {
+    margin-bottom: 25px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 20px;
+}
+
+.form-section:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 15px;
+}
+
+.section-title i {
+    color: var(--primary-color);
+}
+
+/* Form Controls */
+.form-label {
+    font-weight: 500;
+    color: #4b5563;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #4b5563;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(74, 186, 145, 0.15);
+}
+
+textarea.form-control {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.form-text {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+/* Grid Layout */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-row.cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.form-row.cols-1 {
+    grid-template-columns: 1fr;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+/* Checkboxes */
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.form-check-input {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+}
+
+.form-check-label {
+    font-size: 0.9rem;
+    color: #4b5563;
+    cursor: pointer;
+}
+
+/* Patient Summary Card */
+.patient-summary {
+    background-color: #f8fafc;
+    border-radius: 12px;
+    padding: 20px;
+    position: sticky;
+    top: 20px;
+}
+
+.patient-summary-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.info-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.info-item {
+    display: flex;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #64748b;
+    width: 130px;
+    flex-shrink: 0;
+    font-size: 0.85rem;
+}
+
+.info-value {
+    color: #334155;
+    flex: 1;
+    font-size: 0.85rem;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-secondary {
+    background-color: #f1f5f9;
+    color: #64748b;
+}
+
+.btn-secondary:hover {
+    background-color: #e2e8f0;
+    color: #475569;
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+    .consultation-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .patient-summary {
+        position: static;
+        order: -1;
+        margin-bottom: 25px;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .header-actions {
+        width: 100%;
+    }
+    
+    .form-row, 
+    .form-row.cols-3,
+    .checkbox-group {
+        grid-template-columns: 1fr;
+    }
+} 

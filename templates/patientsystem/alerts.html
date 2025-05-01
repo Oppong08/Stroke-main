@@ -1,59 +1,277 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Alerts - Stroke Unit System{% endblock %}
 
-{% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>System Alerts</h2>
-    <div class="alert alert-info">
-        Active Alerts: {{ alerts|length }}
-    </div>
-</div>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/alerts.css' %}">
+{% endblock %}
 
-<div class="row">
-    {% for alert in alerts %}
-    <div class="col-12 mb-4">
-        <div class="card">
-            <div class="card-header {% if alert.type == 'critical' %}bg-danger text-white{% elif alert.type == 'warning' %}bg-warning{% else %}bg-info text-white{% endif %}">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">
-                        {{ alert.get_type_display }}
-                        {% if alert.acknowledged %}
-                        <span class="badge bg-success">Acknowledged</span>
-                        {% endif %}
-                    </h5>
-                    <small>{{ alert.timestamp|date:"Y-m-d H:i" }}</small>
-                </div>
+{% block content %}
+<div class="alerts-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h2>Patient Alerts</h2>
+            <p class="page-subtitle">Monitor and respond to critical patient alerts</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-primary">
+                <i class="fas fa-sync-alt me-2"></i>Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="alerts-filter-container">
+        <div class="filters-section">
+            <div class="filter-group">
+                <label class="filter-label">Alert Type:</label>
+                <select class="filter-select">
+                    <option selected>All Alerts</option>
+                    <option>Critical Only</option>
+                    <option>Warning Only</option>
+                    <option>Info Only</option>
+                </select>
             </div>
-            <div class="card-body">
-                <p class="card-text">{{ alert.description }}</p>
-                <div class="d-flex justify-content-between align-items-center">
-                    {% if alert.patient %}
-                    <a href="{% url 'patientsystem:patient_detail' alert.patient.id %}" class="btn btn-primary">
-                        View Patient
-                    </a>
-                    {% endif %}
-                    {% if not alert.acknowledged and not user.userprofile.role == 'technician' %}
-                    <form method="post" action="{% url 'patientsystem:acknowledge_alert' alert.id %}" class="mb-0">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-success">Acknowledge Alert</button>
-                    </form>
-                    {% endif %}
-                </div>
-                {% if alert.acknowledged %}
-                <div class="mt-2 text-muted">
-                    <small>Acknowledged by {{ alert.acknowledged_by.username }} at {{ alert.acknowledged_at|date:"Y-m-d H:i" }}</small>
-                </div>
-                {% endif %}
+            
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search alerts...">
+            </div>
+            
+            <div class="toggle-container">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="showAcknowledgedSwitch">
+                    <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label">Show acknowledged</span>
             </div>
         </div>
     </div>
-    {% empty %}
-    <div class="col-12">
-        <div class="alert alert-success">
-            No active alerts at this time.
+
+    <!-- Active Alerts Section -->
+    <h3 class="section-title mb-3">Active Alerts</h3>
+    <div class="alerts-list">
+        <!-- Critical Stroke Alert -->
+        <div class="alert-card critical">
+            <div class="alert-header">
+                <div class="alert-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="alert-title-container">
+                    <div class="alert-type">CRITICAL</div>
+                    <div class="alert-timestamp">2025-04-29 01:25</div>
+                </div>
+            </div>
+            <div class="alert-content">
+                <p class="alert-description">SEVERE STROKE ALERT: NIHSS score 18 indicates major stroke. Immediate intervention required.</p>
+                <div class="alert-meta">
+                    <div class="patient-id">
+                        <i class="fas fa-user"></i>
+                        Patient ID: 48
+                    </div>
+                </div>
+                <div class="alert-actions">
+                    <div class="action-buttons">
+                        <a href="/patient/48/" class="btn btn-view">
+                            <i class="fas fa-eye"></i>View Patient
+                        </a>
+                        <form method="post" action="/alert/1/acknowledge/" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-acknowledge">
+                                <i class="fas fa-check"></i>Acknowledge
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Elevated Glucose Alert -->
+        <div class="alert-card warning">
+            <div class="alert-header">
+                <div class="alert-icon">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="alert-title-container">
+                    <div class="alert-type">WARNING</div>
+                    <div class="alert-timestamp">2025-04-29 01:25</div>
+                </div>
+            </div>
+            <div class="alert-content">
+                <p class="alert-description">ELEVATED BLOOD GLUCOSE: 196 mg/dL. Monitor for hyperglycemia.</p>
+                <div class="alert-meta">
+                    <div class="patient-id">
+                        <i class="fas fa-user"></i>
+                        Patient ID: 47
+                    </div>
+                </div>
+                <div class="alert-actions">
+                    <div class="action-buttons">
+                        <a href="/patient/47/" class="btn btn-view">
+                            <i class="fas fa-eye"></i>View Patient
+                        </a>
+                        <form method="post" action="/alert/2/acknowledge/" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-acknowledge">
+                                <i class="fas fa-check"></i>Acknowledge
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Critical Stroke Alert -->
+        <div class="alert-card critical">
+            <div class="alert-header">
+                <div class="alert-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="alert-title-container">
+                    <div class="alert-type">CRITICAL</div>
+                    <div class="alert-timestamp">2025-04-29 01:25</div>
+                </div>
+            </div>
+            <div class="alert-content">
+                <p class="alert-description">SEVERE STROKE ALERT: NIHSS score 12 indicates major stroke. Immediate intervention required.</p>
+                <div class="alert-meta">
+                    <div class="patient-id">
+                        <i class="fas fa-user"></i>
+                        Patient ID: 46
+                    </div>
+                </div>
+                <div class="alert-actions">
+                    <div class="action-buttons">
+                        <a href="/patient/46/" class="btn btn-view">
+                            <i class="fas fa-eye"></i>View Patient
+                        </a>
+                        <form method="post" action="/alert/3/acknowledge/" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-acknowledge">
+                                <i class="fas fa-check"></i>Acknowledge
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Critical Stroke Alert -->
+        <div class="alert-card critical">
+            <div class="alert-header">
+                <div class="alert-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="alert-title-container">
+                    <div class="alert-type">CRITICAL</div>
+                    <div class="alert-timestamp">2025-04-29 01:25</div>
+                </div>
+            </div>
+            <div class="alert-content">
+                <p class="alert-description">SEVERE STROKE ALERT: NIHSS score 15 indicates major stroke. Immediate intervention required.</p>
+                <div class="alert-meta">
+                    <div class="patient-id">
+                        <i class="fas fa-user"></i>
+                        Patient ID: 45
+                    </div>
+                </div>
+                <div class="alert-actions">
+                    <div class="action-buttons">
+                        <a href="/patient/45/" class="btn btn-view">
+                            <i class="fas fa-eye"></i>View Patient
+                        </a>
+                        <form method="post" action="/alert/4/acknowledge/" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-acknowledge">
+                                <i class="fas fa-check"></i>Acknowledge
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Critical Stroke Alert -->
+        <div class="alert-card critical">
+            <div class="alert-header">
+                <div class="alert-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="alert-title-container">
+                    <div class="alert-type">CRITICAL</div>
+                    <div class="alert-timestamp">2025-04-29 01:25</div>
+                </div>
+            </div>
+            <div class="alert-content">
+                <p class="alert-description">SEVERE STROKE ALERT: NIHSS score 13 indicates major stroke. Immediate intervention required.</p>
+                <div class="alert-meta">
+                    <div class="patient-id">
+                        <i class="fas fa-user"></i>
+                        Patient ID: 44
+                    </div>
+                </div>
+                <div class="alert-actions">
+                    <div class="action-buttons">
+                        <a href="/patient/44/" class="btn btn-view">
+                            <i class="fas fa-eye"></i>View Patient
+                        </a>
+                        <form method="post" action="/alert/5/acknowledge/" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-acknowledge">
+                                <i class="fas fa-check"></i>Acknowledge
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    {% endfor %}
+    
+    <!-- Footer Actions -->
+    <div class="footer-actions mt-4 mb-5">
+        <div class="d-flex justify-content-between align-items-center p-3 bg-white rounded-3 shadow-sm">
+            <div>
+                <span class="text-muted">Showing 5 of 5 alerts</span>
+            </div>
+            <div>
+                <button type="button" class="btn btn-primary">
+                    <i class="fas fa-check-double me-2"></i>Acknowledge All
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acknowledged Alerts Section -->
+    <h3 class="section-title mb-3">Acknowledged Alerts</h3>
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="empty-state-text">No acknowledged alerts</div>
+        <div>All alerts require attention</div>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enable tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+        
+        // Filter toggle functionality
+        const filterSwitch = document.getElementById('showAcknowledgedSwitch');
+        if (filterSwitch) {
+            filterSwitch.addEventListener('change', function() {
+                console.log('Filter changed:', this.checked);
+                // Implement filtering logic here
+            });
+        }
+    });
+</script>
 {% endblock %} 

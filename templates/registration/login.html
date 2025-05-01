@@ -5,59 +5,83 @@
 
 {% block content %}
 <div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card shadow-lg border-0 rounded-lg mt-5">
-                <div class="card-header bg-primary text-white text-center py-4">
-                    <h3 class="mb-0">Stroke Unit System</h3>
-                    <p class="mb-0">Please sign in to continue</p>
-                </div>
-                <div class="card-body p-4">
-                    <form method="post" class="needs-validation" novalidate>
-                        {% csrf_token %}
-                        
-                        {% if form.errors %}
-                        <div class="alert alert-danger">
-                            Please correct the errors below.
-                        </div>
-                        {% endif %}
-
-                        <div class="mb-3">
-                            <label for="id_username" class="form-label">Username</label>
-                            <input type="text" name="username" id="id_username" class="form-control" required>
-                            <div class="invalid-feedback">
-                                Please enter your username.
+    <div class="row justify-content-center align-items-center min-vh-75">
+        <div class="col-md-8 col-lg-6">
+            <!-- Login Section -->
+            <div class="card border-0 shadow-lg overflow-hidden">
+                <div class="row g-0">
+                    <!-- Left Column - Image/Decoration -->
+                    <div class="col-lg-5 d-none d-lg-block login-image-container">
+                        <div class="login-image-overlay">
+                            <div class="text-center p-4">
+                                <i class="fas fa-heartbeat fa-3x mb-3 pulse-icon"></i>
+                                <h2 class="fw-bold">Welcome Back</h2>
+                                <p class="mb-0">Your expertise saves lives</p>
                             </div>
                         </div>
-
-                        <div class="mb-3">
-                            <label for="id_password" class="form-label">Password</label>
-                            <input type="password" name="password" id="id_password" class="form-control" required>
-                            <div class="invalid-feedback">
-                                Please enter your password.
+                    </div>
+                    
+                    <!-- Right Column - Login Form -->
+                    <div class="col-lg-7">
+                        <div class="card-body p-4 p-lg-5">
+                            <div class="text-center mb-4">
+                                <h2 class="fw-bold">Sign In</h2>
+                                <p class="text-muted">Access your Stroke Unit dashboard</p>
                             </div>
-                        </div>
+                            
+                            <form method="post" class="needs-validation" novalidate>
+                                {% csrf_token %}
+                                
+                                {% if form.errors %}
+                                <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    <div>Please check your credentials and try again.</div>
+                                </div>
+                                {% endif %}
 
-                        <div class="mb-3">
-                            <label for="id_role" class="form-label">Role</label>
-                            <select name="role" id="id_role" class="form-select" required>
-                                <option value="">Select your role</option>
-                                <option value="neurologist">Neurologist</option>
-                                <option value="technician">Mobile Technician</option>
-                            </select>
-                            <div class="invalid-feedback">
-                                Please select your role.
-                            </div>
-                        </div>
+                                <div class="form-floating mb-3">
+                                    <input type="text" name="username" id="id_username" class="form-control" placeholder="Username" required>
+                                    <label for="id_username">Username</label>
+                                    <div class="invalid-feedback">
+                                        Please enter your username.
+                                    </div>
+                                </div>
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">Sign In</button>
+                                <div class="form-floating mb-3">
+                                    <input type="password" name="password" id="id_password" class="form-control" placeholder="Password" required>
+                                    <label for="id_password">Password</label>
+                                    <div class="invalid-feedback">
+                                        Please enter your password.
+                                    </div>
+                                </div>
+
+                                <div class="form-floating mb-4">
+                                    <select name="role" id="id_role" class="form-select" required>
+                                        <option value="">Select your role</option>
+                                        <option value="neurologist">Neurologist</option>
+                                        <option value="technician">Mobile Technician</option>
+                                    </select>
+                                    <label for="id_role">Role</label>
+                                    <div class="invalid-feedback">
+                                        Please select your role.
+                                    </div>
+                                </div>
+
+                                <div class="d-grid mb-4">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                                    </button>
+                                </div>
+                                
+                                <div class="text-center">
+                                    <p class="mb-0">Don't have an account? 
+                                        <a href="{% url 'register' %}" class="fw-semibold text-decoration-none">
+                                            Register
+                                        </a>
+                                    </p>
+                                </div>
+                            </form>
                         </div>
-                    </form>
-                </div>
-                <div class="card-footer text-center py-3">
-                    <div class="small">
-                        Don't have an account? <a href="{% url 'register' %}">Register</a>
                     </div>
                 </div>
             </div>
@@ -81,5 +105,20 @@
             }, false)
         })
 })()
+
+// Show password toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#id_password');
+    
+    if (togglePassword) {
+        togglePassword.addEventListener('click', function() {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    }
+});
 </script>
 {% endblock %} 

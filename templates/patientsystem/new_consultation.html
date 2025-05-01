@@ -1,84 +1,274 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}New Consultation - {{ patient.name }}{% endblock %}
 
+{% block extra_css %}
+<link href="{% static 'css/consultation-form.css' %}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>New Consultation for {{ patient.name }}</h2>
-    <a href="{% url 'patientsystem:patient_detail' patient.id %}" class="btn btn-secondary">Back to Patient</a>
-</div>
-
-<div class="row">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Consultation Form</h5>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    
-                    <div class="mb-3">
-                        <label for="diagnosis" class="form-label">Diagnosis</label>
-                        <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3" required></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="treatment_plan" class="form-label">Treatment Plan</label>
-                        <textarea class="form-control" id="treatment_plan" name="treatment_plan" rows="3" required></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="test_orders" class="form-label">Test Orders</label>
-                        <textarea class="form-control" id="test_orders" name="test_orders" rows="2"></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="nihss_score" class="form-label">NIHSS Score</label>
-                        <input type="number" class="form-control" id="nihss_score" name="nihss_score" min="0" max="42" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="blood_pressure" class="form-label">Blood Pressure</label>
-                        <input type="text" class="form-control" id="blood_pressure" name="blood_pressure" placeholder="e.g., 120/80" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="heart_rate" class="form-label">Heart Rate</label>
-                        <input type="number" class="form-control" id="heart_rate" name="heart_rate" min="0" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="oxygen_saturation" class="form-label">Oxygen Saturation</label>
-                        <input type="number" class="form-control" id="oxygen_saturation" name="oxygen_saturation" min="0" max="100" step="0.1" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="temperature" class="form-label">Temperature (°C)</label>
-                        <input type="number" class="form-control" id="temperature" name="temperature" min="35" max="42" step="0.1" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="respiratory_rate" class="form-label">Respiratory Rate (breaths/min)</label>
-                        <input type="number" class="form-control" id="respiratory_rate" name="respiratory_rate" min="8" max="40" required>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Submit Consultation</button>
-                </form>
-            </div>
+<div class="consultation-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="d-flex align-items-center">
+            <h2>New Consultation</h2>
+            <span class="patient-id-badge">Patient: {{ patient.name }}</span>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'patientsystem:patient_detail' patient.id %}" class="btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Patient
+            </a>
         </div>
     </div>
-
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Patient Summary</h5>
-            </div>
-            <div class="card-body">
-                <p><strong>Name:</strong> {{ patient.name }}</p>
-                <p><strong>Age:</strong> {{ patient.age }}</p>
-                <p><strong>Sex:</strong> {{ patient.sex }}</p>
-                <p><strong>Chief Complaint:</strong> {{ patient.chief_complaint }}</p>
+    
+    <!-- Form Layout -->
+    <div class="consultation-layout">
+        <!-- Form Column -->
+        <div>
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Basic Info Section -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>Basic Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="symptom_onset_time" class="form-label">Symptom Onset Time</label>
+                                <input type="datetime-local" class="form-control" id="symptom_onset_time" name="symptom_onset_time" required>
+                                <small class="form-text">Enter the exact time when symptoms first appeared</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="nihss_score" class="form-label">NIHSS Score</label>
+                                <input type="number" class="form-control" id="nihss_score" name="nihss_score" min="0" max="42" required>
+                                <small class="form-text">Enter a score between 0 and 42</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Vitals Section -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <i class="fas fa-heartbeat"></i>
+                        <h3>Vital Signs</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="blood_pressure" class="form-label">Blood Pressure (mmHg)</label>
+                                <input type="text" class="form-control" id="blood_pressure" name="blood_pressure" pattern="\d{2,3}/\d{2,3}" required>
+                                <small class="form-text">Format: systolic/diastolic (e.g., 120/80)</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="heart_rate" class="form-label">Heart Rate (bpm)</label>
+                                <input type="number" class="form-control" id="heart_rate" name="heart_rate" min="30" max="200" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="oxygen_saturation" class="form-label">Oxygen Saturation (%)</label>
+                                <input type="number" class="form-control" id="oxygen_saturation" name="oxygen_saturation" min="0" max="100" step="0.1" required>
+                                <small class="form-text">Enter value with one decimal place (e.g., 98.5)</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="temperature" class="form-label">Temperature (°C)</label>
+                                <input type="number" class="form-control" id="temperature" name="temperature" min="35" max="42" step="0.1" required>
+                                <small class="form-text">Enter value with one decimal place (e.g., 37.2)</small>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="respiratory_rate" class="form-label">Respiratory Rate (breaths/min)</label>
+                                <input type="number" class="form-control" id="respiratory_rate" name="respiratory_rate" min="8" max="40" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Lab Results Section -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <i class="fas fa-vial"></i>
+                        <h3>Lab Results</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="cbc_plt" class="form-label">Platelet Count (x10³/μL)</label>
+                                <input type="number" class="form-control" id="cbc_plt" name="cbc_plt" min="0" max="1000">
+                            </div>
+                            <div class="form-group">
+                                <label for="inr" class="form-label">INR</label>
+                                <input type="number" class="form-control" id="inr" name="inr" min="0" max="10" step="0.1">
+                                <small class="form-text">Enter value with one decimal place (e.g., 1.2)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Imaging Studies Section -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <i class="fas fa-x-ray"></i>
+                        <h3>Imaging Studies</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="study_type" class="form-label">Study Type</label>
+                                <select class="form-control" id="study_type" name="study_type">
+                                    <option value="CT">CT Scan</option>
+                                    <option value="MRI">MRI</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="stroke_type" class="form-label">Stroke Type</label>
+                                <select class="form-control" id="stroke_type" name="stroke_type">
+                                    <option value="ischemic">Ischemic Stroke</option>
+                                    <option value="hemorrhagic">Hemorrhagic Stroke</option>
+                                    <option value="none">No Stroke</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row cols-1">
+                            <div class="form-group">
+                                <label for="findings" class="form-label">Imaging Findings</label>
+                                <textarea class="form-control" id="findings" name="findings" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Events Section -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <i class="fas fa-history"></i>
+                        <h3>Recent Events (Past 3 Months)</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="checkbox-group">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="recent_surgery" name="recent_surgery">
+                                <label class="form-check-label" for="recent_surgery">Recent Surgery</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="recent_biopsy" name="recent_biopsy">
+                                <label class="form-check-label" for="recent_biopsy">Recent Biopsy</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="recent_head_trauma" name="recent_head_trauma">
+                                <label class="form-check-label" for="recent_head_trauma">Recent Head Trauma</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="recent_stroke" name="recent_stroke">
+                                <label class="form-check-label" for="recent_stroke">Recent Stroke</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="recent_mi" name="recent_mi">
+                                <label class="form-check-label" for="recent_mi">Recent Myocardial Infarction</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Diagnosis Section -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <i class="fas fa-stethoscope"></i>
+                        <h3>Diagnosis and Treatment</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="diagnosis" class="form-label">Diagnosis</label>
+                            <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="treatment_plan" class="form-label">Treatment Plan</label>
+                            <textarea class="form-control" id="treatment_plan" name="treatment_plan" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="test_orders" class="form-label">Test Orders (Optional)</label>
+                            <textarea class="form-control" id="test_orders" name="test_orders" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Consent Section -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <i class="fas fa-file-signature"></i>
+                        <h3>Consent</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="tpa_consent" name="tpa_consent" required>
+                            <label class="form-check-label" for="tpa_consent">Informed Consent for tPA Administration</label>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="consent_given_by" class="form-label">Consent Given By</label>
+                                <input type="text" class="form-control" id="consent_given_by" name="consent_given_by" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="relationship_to_patient" class="form-label">Relationship to Patient</label>
+                                <input type="text" class="form-control" id="relationship_to_patient" name="relationship_to_patient" required>
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Submit Consultation
+                            </button>
+                            <a href="{% url 'patientsystem:patient_detail' patient.id %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Patient Summary Sidebar -->
+        <div>
+            <div class="patient-summary">
+                <h3 class="patient-summary-title">
+                    <i class="fas fa-user"></i> Patient Summary
+                </h3>
+                <ul class="info-list">
+                    <li class="info-item">
+                        <div class="info-label">Name</div>
+                        <div class="info-value">{{ patient.name }}</div>
+                    </li>
+                    <li class="info-item">
+                        <div class="info-label">Age</div>
+                        <div class="info-value">{{ patient.age }} years</div>
+                    </li>
+                    <li class="info-item">
+                        <div class="info-label">Sex</div>
+                        <div class="info-value">{{ patient.sex }}</div>
+                    </li>
+                    <li class="info-item">
+                        <div class="info-label">Chief Complaint</div>
+                        <div class="info-value">{{ patient.chief_complaint }}</div>
+                    </li>
+                    {% if patient.nihss_score %}
+                    <li class="info-item">
+                        <div class="info-label">NIHSS Score</div>
+                        <div class="info-value">{{ patient.nihss_score }}</div>
+                    </li>
+                    {% endif %}
+                    {% if patient.medical_history %}
+                    <li class="info-item">
+                        <div class="info-label">Medical History</div>
+                        <div class="info-value">{{ patient.medical_history }}</div>
+                    </li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
     </div>
