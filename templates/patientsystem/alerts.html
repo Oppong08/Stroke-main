@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Alerts - Stroke Unit System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>System Alerts</h2>
+    <div class="alert alert-info">
+        Active Alerts: {{ alerts|length }}
+    </div>
+</div>
+
+<div class="row">
+    {% for alert in alerts %}
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header {% if alert.type == 'critical' %}bg-danger text-white{% elif alert.type == 'warning' %}bg-warning{% else %}bg-info text-white{% endif %}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        {{ alert.get_type_display }}
+                        {% if alert.acknowledged %}
+                        <span class="badge bg-success">Acknowledged</span>
+                        {% endif %}
+                    </h5>
+                    <small>{{ alert.timestamp|date:"Y-m-d H:i" }}</small>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="card-text">{{ alert.description }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    {% if alert.patient %}
+                    <a href="{% url 'patientsystem:patient_detail' alert.patient.id %}" class="btn btn-primary">
+                        View Patient
+                    </a>
+                    {% endif %}
+                    {% if not alert.acknowledged and not user.userprofile.role == 'technician' %}
+                    <form method="post" action="{% url 'patientsystem:acknowledge_alert' alert.id %}" class="mb-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">Acknowledge Alert</button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% if alert.acknowledged %}
+                <div class="mt-2 text-muted">
+                    <small>Acknowledged by {{ alert.acknowledged_by.username }} at {{ alert.acknowledged_at|date:"Y-m-d H:i" }}</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-success">
+            No active alerts at this time.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %} 

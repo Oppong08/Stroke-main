@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load patient_filters %}
+
+{% block title %}{{ patient.name }} - Patient Details{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Patient Details: {{ patient.name }}</h2>
+    <div>
+        {% if can_create_consultation %}
+        <a href="{% url 'patientsystem:new_consultation' patient.id %}" class="btn btn-success">New Consultation</a>
+        {% endif %}
+        <a href="{% url 'patientsystem:dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Basic Information -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Basic Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Name:</strong> {{ patient.name }}</p>
+                <p><strong>Age:</strong> {{ patient.age }}</p>
+                <p><strong>Sex:</strong> {{ patient.sex }}</p>
+                <p><strong>Chief Complaint:</strong> {{ patient.chief_complaint }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medical History -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Medical History</h5>
+            </div>
+            <div class="card-body">
+                <p>{{ patient.medical_history }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vitals -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Vital Signs</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <p class="vital-label">Blood Pressure</p>
+                        <p class="vital-sign {% if patient.vitals.blood_pressure|get_systolic > 180 %}vital-critical{% endif %}">
+                            {{ patient.vitals.blood_pressure }}
+                        </p>
+                    </div>
+                    <div class="col-6">
+                        <p class="vital-label">Heart Rate</p>
+                        <p class="vital-sign {% if patient.vitals.heart_rate > 100 %}vital-warning{% endif %}">
+                            {{ patient.vitals.heart_rate }} bpm
+                        </p>
+                    </div>
+                    <div class="col-6">
+                        <p class="vital-label">Oxygen Saturation</p>
+                        <p class="vital-sign {% if patient.vitals.oxygen_saturation < 93 %}vital-critical{% endif %}">
+                            {{ patient.vitals.oxygen_saturation }}%
+                        </p>
+                    </div>
+                    <div class="col-6">
+                        <p class="vital-label">Temperature</p>
+                        <p class="vital-sign {% if patient.vitals.temperature > 38.5 %}vital-warning{% endif %}">
+                            {{ patient.vitals.temperature }}°C
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NIHSS Score -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">NIHSS Score</h5>
+            </div>
+            <div class="card-body">
+                <p class="vital-sign {% if patient.nihss_score > 15 %}vital-critical{% elif patient.nihss_score > 10 %}vital-warning{% endif %}">
+                    {{ patient.nihss_score }}
+                </p>
+                <p class="text-muted">Last updated: {{ patient.nihss_last_updated|date:"F j, Y, g:i a" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Consultations -->
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Recent Consultations</h5>
+            </div>
+            <div class="card-body">
+                {% if consultations %}
+                    {% for consultation in consultations %}
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <h6>Consultation on {{ consultation.date|date:"F j, Y, g:i a" }}</h6>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <p><strong>Diagnosis:</strong></p>
+                                    <p class="text-muted">{{ consultation.diagnosis }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Treatment Plan:</strong></p>
+                                    <p class="text-muted">{{ consultation.treatment_plan }}</p>
+                                </div>
+                            </div>
+                            {% if consultation.test_orders %}
+                                <div class="mt-2">
+                                    <p><strong>Test Orders:</strong></p>
+                                    <p class="text-muted">{{ consultation.test_orders }}</p>
+                                </div>
+                            {% endif %}
+                            <div class="mt-3">
+                                <small class="text-muted">NIHSS Score: {{ consultation.nihss_score }}</small>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No consultations recorded yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

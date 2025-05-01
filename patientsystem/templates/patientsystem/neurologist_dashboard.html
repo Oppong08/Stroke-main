@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Remote Neurologist Dashboard</h2>
+    
+    <!-- Recent Alerts Section -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Recent Alerts</h4>
+                    <a href="{% url 'patientsystem:alerts' %}" class="btn btn-primary">View All Alerts</a>
+                </div>
+                <div class="card-body">
+                    {% if alerts %}
+                        <div class="list-group">
+                            {% for alert in alerts %}
+                            <div class="list-group-item list-group-item-action {% if alert.type == 'critical' %}list-group-item-danger{% else %}list-group-item-warning{% endif %}">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">{{ alert.description }}</h5>
+                                    <small>{{ alert.timestamp|date:"Y-m-d H:i" }}</small>
+                                </div>
+                                <p class="mb-1">Patient ID: {{ alert.patient_id }}</p>
+                                <a href="{% url 'patientsystem:patient_detail' alert.patient_id %}" class="btn btn-sm btn-primary">View Patient</a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center">No recent alerts</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient List Section -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Patient List</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Age</th>
+                                    <th>Sex</th>
+                                    <th>NIHSS Score</th>
+                                    <th>Last Consultation</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for patient in patients %}
+                                <tr>
+                                    <td>{{ patient.id }}</td>
+                                    <td>{{ patient.name }}</td>
+                                    <td>{{ patient.age }}</td>
+                                    <td>{{ patient.sex }}</td>
+                                    <td>
+                                        <span class="badge {% if patient.nihss_score > 15 %}bg-danger{% elif patient.nihss_score > 5 %}bg-warning{% else %}bg-success{% endif %}">
+                                            {{ patient.nihss_score }}
+                                        </span>
+                                    </td>
+                                    <td>{{ patient.nihss_last_updated|date:"Y-m-d H:i" }}</td>
+                                    <td>
+                                        <a href="{% url 'patientsystem:patient_detail' patient.id %}" class="btn btn-sm btn-info">View</a>
+                                        <a href="{% url 'patientsystem:new_consultation' patient.id %}" class="btn btn-sm btn-success">New Consultation</a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">No patients found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,203 @@
+{% extends 'patientsystem/base.html' %}
+{% load static %}
+
+{% block title %}New Consultation - {{ patient.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">New Consultation for {{ patient.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-group mb-3">
+                            <label for="symptom_onset_time">Symptom Onset Time</label>
+                            <input type="datetime-local" class="form-control" id="symptom_onset_time" name="symptom_onset_time" required>
+                            <small class="form-text text-muted">Enter the exact time when symptoms first appeared</small>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="nihss_score">NIHSS Score</label>
+                            <input type="number" class="form-control" id="nihss_score" name="nihss_score" 
+                                   min="0" max="42" required>
+                            <small class="form-text text-muted">Enter a score between 0 and 42</small>
+                        </div>
+
+                        <h5 class="mt-4">Vitals</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="blood_pressure">Blood Pressure (mmHg)</label>
+                                    <input type="text" class="form-control" id="blood_pressure" name="blood_pressure" 
+                                           pattern="\d{2,3}/\d{2,3}" required>
+                                    <small class="form-text text-muted">Format: systolic/diastolic (e.g., 120/80)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="heart_rate">Heart Rate (bpm)</label>
+                                    <input type="number" class="form-control" id="heart_rate" name="heart_rate" 
+                                           min="30" max="200" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="oxygen_saturation">Oxygen Saturation (%)</label>
+                                    <input type="number" class="form-control" id="oxygen_saturation" name="oxygen_saturation" 
+                                           min="0" max="100" step="0.1" required>
+                                    <small class="form-text text-muted">Enter value with one decimal place (e.g., 98.5)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="temperature">Temperature (°C)</label>
+                                    <input type="number" class="form-control" id="temperature" name="temperature" 
+                                           min="35" max="42" step="0.1" required>
+                                    <small class="form-text text-muted">Enter value with one decimal place (e.g., 37.2)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="respiratory_rate">Respiratory Rate (breaths/min)</label>
+                                    <input type="number" class="form-control" id="respiratory_rate" name="respiratory_rate" 
+                                           min="8" max="40" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 class="mt-4">Lab Results</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="cbc_plt">Platelet Count (x10³/μL)</label>
+                                    <input type="number" class="form-control" id="cbc_plt" name="cbc_plt" 
+                                           min="0" max="1000">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="inr">INR</label>
+                                    <input type="number" class="form-control" id="inr" name="inr" 
+                                           min="0" max="10" step="0.1">
+                                    <small class="form-text text-muted">Enter value with one decimal place (e.g., 1.2)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 class="mt-4">Imaging Studies</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="study_type">Study Type</label>
+                                    <select class="form-control" id="study_type" name="study_type">
+                                        <option value="CT">CT Scan</option>
+                                        <option value="MRI">MRI</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="stroke_type">Stroke Type</label>
+                                    <select class="form-control" id="stroke_type" name="stroke_type">
+                                        <option value="ischemic">Ischemic Stroke</option>
+                                        <option value="hemorrhagic">Hemorrhagic Stroke</option>
+                                        <option value="none">No Stroke</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group mb-3">
+                                    <label for="findings">Imaging Findings</label>
+                                    <textarea class="form-control" id="findings" name="findings" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 class="mt-4">Recent Events (Past 3 Months)</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    <input type="checkbox" class="form-check-input" id="recent_surgery" name="recent_surgery">
+                                    <label class="form-check-label" for="recent_surgery">Recent Surgery</label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input type="checkbox" class="form-check-input" id="recent_biopsy" name="recent_biopsy">
+                                    <label class="form-check-label" for="recent_biopsy">Recent Biopsy</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    <input type="checkbox" class="form-check-input" id="recent_head_trauma" name="recent_head_trauma">
+                                    <label class="form-check-label" for="recent_head_trauma">Recent Head Trauma</label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input type="checkbox" class="form-check-input" id="recent_stroke" name="recent_stroke">
+                                    <label class="form-check-label" for="recent_stroke">Recent Stroke</label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input type="checkbox" class="form-check-input" id="recent_mi" name="recent_mi">
+                                    <label class="form-check-label" for="recent_mi">Recent Myocardial Infarction</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 class="mt-4">Diagnosis and Treatment</h5>
+                        <div class="form-group mb-3">
+                            <label for="diagnosis">Diagnosis</label>
+                            <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3" required></textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="treatment_plan">Treatment Plan</label>
+                            <textarea class="form-control" id="treatment_plan" name="treatment_plan" rows="3" required></textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="test_orders">Test Orders (Optional)</label>
+                            <textarea class="form-control" id="test_orders" name="test_orders" rows="2"></textarea>
+                        </div>
+
+                        <h5 class="mt-4">Consent</h5>
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="tpa_consent" name="tpa_consent" required>
+                            <label class="form-check-label" for="tpa_consent">Informed Consent for tPA Administration</label>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="consent_given_by">Consent Given By</label>
+                            <input type="text" class="form-control" id="consent_given_by" name="consent_given_by" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="relationship_to_patient">Relationship to Patient</label>
+                            <input type="text" class="form-control" id="relationship_to_patient" name="relationship_to_patient" required>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">Submit Consultation</button>
+                            <a href="{% url 'patientsystem:patient_detail' patient.id %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Patient Summary</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> {{ patient.name }}</p>
+                    <p><strong>Age:</strong> {{ patient.age }}</p>
+                    <p><strong>Sex:</strong> {{ patient.sex }}</p>
+                    <p><strong>Chief Complaint:</strong> {{ patient.chief_complaint }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Stroke Unit System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="mb-0">Patient Dashboard</h2>
+        <p class="text-muted">Welcome back, {{ user.username }}</p>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Total Patients</h6>
+                        <h2 class="mb-0">{{ patients|length }}</h2>
+                    </div>
+                    <i class="fas fa-users fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Patient List Section -->
+<div class="row mb-5">
+    {% for patient in patients %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">{{ patient.name }}</h5>
+                    <span class="badge bg-primary">ID: {{ patient.hospital_id }}</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-user me-2 text-muted"></i>
+                        <span><strong>Age:</strong> {{ patient.age }} | <strong>Sex:</strong> {{ patient.sex }}</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-comment-medical me-2 text-muted"></i>
+                        <span><strong>Chief Complaint:</strong> {{ patient.chief_complaint }}</span>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'patientsystem:patient_detail' patient.id %}" class="btn btn-outline-primary">
+                        <i class="fas fa-eye me-2"></i>View Details
+                    </a>
+                    <a href="{% url 'patientsystem:new_consultation' patient.id %}" class="btn btn-primary">
+                        <i class="fas fa-plus-circle me-2"></i>New Consultation
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-user-injured fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No patients found</h4>
+                <p class="text-muted">Please add some patients to the system.</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Active Alerts Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bell me-2 text-warning"></i>Active Alerts
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for patient in patients %}
+                    {% with active_alerts=patient.alerts.filter.acknowledged=False %}
+                    {% if active_alerts %}
+                    <div class="alert-card mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">
+                                <i class="fas fa-user me-2"></i>{{ patient.name }}
+                                <small class="text-muted">(ID: {{ patient.hospital_id }})</small>
+                            </h6>
+                        </div>
+                        <div class="list-group">
+                            {% for alert in active_alerts %}
+                            <div class="list-group-item list-group-item-action {% if alert.type == 'critical' %}list-group-item-danger{% else %}list-group-item-warning{% endif %}">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">
+                                        <i class="fas fa-exclamation-circle me-2"></i>{{ alert.get_type_display }}
+                                    </h6>
+                                    <small>{{ alert.timestamp|date:"H:i" }}</small>
+                                </div>
+                                <p class="mb-1">{{ alert.description }}</p>
+                                {% if not user.userprofile.role == 'technician' %}
+                                <form method="post" action="{% url 'patientsystem:acknowledge_alert' alert.id %}" class="mt-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-light">
+                                        <i class="fas fa-check me-1"></i>Acknowledge
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,57 @@
+{% extends 'patientsystem/base.html' %}
+{% load static %}
+
+{% block title %}Alerts - Stroke Unit System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>System Alerts</h2>
+        {% if user.role == 'neurologist' %}
+        <a href="{% url 'patientsystem:dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        {% for alert in alerts %}
+        <div class="col-md-6 mb-4">
+            <div class="card {% if alert.type == 'critical' %}border-danger{% elif alert.type == 'warning' %}border-warning{% else %}border-info{% endif %}">
+                <div class="card-header {% if alert.type == 'critical' %}bg-danger text-white{% elif alert.type == 'warning' %}bg-warning{% else %}bg-info text-white{% endif %}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ alert.get_type_display }}</h5>
+                        <small>{{ alert.timestamp|date:"F j, Y, g:i a" }}</small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ alert.description }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        {% if alert.patient %}
+                        <a href="{% url 'patientsystem:patient_detail' alert.patient.id %}" class="btn btn-primary">
+                            View Patient
+                        </a>
+                        {% endif %}
+                        {% if user.role == 'neurologist' and not alert.acknowledged %}
+                        <form method="post" action="{% url 'patientsystem:acknowledge_alert' alert.id %}" class="mb-0">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">Acknowledge Alert</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% if alert.acknowledged %}
+                    <div class="mt-2 text-muted">
+                        <small>Acknowledged by {{ alert.acknowledged_by.username }} at {{ alert.acknowledged_at|date:"Y-m-d H:i" }}</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-success">
+                No active alerts at this time.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

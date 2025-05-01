@@ -1,0 +1,108 @@
+{% extends 'patientsystem/base.html' %}
+{% load static %}
+
+{% block title %}{{ patient.name }} - Patient Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h2 class="mb-4">{{ patient.name }}</h2>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Patient Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>ID:</strong> {{ patient.id }}</p>
+                            <p><strong>Age:</strong> {{ patient.age }}</p>
+                            <p><strong>Gender:</strong> {{ patient.gender }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Admission Date:</strong> {{ patient.admission_date|date:"F j, Y" }}</p>
+                            <p><strong>Current Status:</strong> {{ patient.status }}</p>
+                            <p><strong>Last Updated:</strong> {{ patient.nihss_last_updated|date:"F j, Y, g:i a" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Vitals</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Blood Pressure:</strong> {{ patient.vitals.blood_pressure }}</p>
+                            <p><strong>Heart Rate:</strong> {{ patient.vitals.heart_rate }} bpm</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Oxygen Saturation:</strong> {{ patient.vitals.oxygen_saturation }}%</p>
+                            <p><strong>Temperature:</strong> {{ patient.vitals.temperature }}°C</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Consultations</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_consultations %}
+                        <div class="list-group">
+                            {% for consultation in recent_consultations %}
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Consultation on {{ consultation.date|date:"F j, Y, g:i a" }}</h6>
+                                        <small>NIHSS: {{ consultation.nihss_score }}</small>
+                                    </div>
+                                    <p class="mb-1"><strong>Diagnosis:</strong> {{ consultation.diagnosis }}</p>
+                                    <p class="mb-1"><strong>Treatment Plan:</strong> {{ consultation.treatment_plan }}</p>
+                                    {% if consultation.test_orders %}
+                                        <p class="mb-1"><strong>Test Orders:</strong> {{ consultation.test_orders }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No consultations recorded yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'patientsystem:new_consultation' patient.id %}" class="btn btn-primary btn-block mb-2">
+                        New Consultation
+                    </a>
+                    <a href="{% url 'patientsystem:alerts' %}" class="btn btn-warning btn-block">
+                        View Alerts
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">NIHSS Score</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <h2 class="display-4 {% if patient.nihss_score > 15 %}text-danger{% elif patient.nihss_score > 10 %}text-warning{% else %}text-success{% endif %}">
+                            {{ patient.nihss_score }}
+                        </h2>
+                        <p class="text-muted">Last updated: {{ patient.nihss_last_updated|date:"F j, Y, g:i a" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

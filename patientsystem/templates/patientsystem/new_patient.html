@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Add New Patient</h2>
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Personal Information</h4>
+                <div class="mb-3">
+                    <label for="first_name" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="last_name" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="date_of_birth" class="form-label">Date of Birth</label>
+                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" required>
+                </div>
+                <div class="mb-3">
+                    <label for="gender" class="form-label">Gender</label>
+                    <select class="form-select" id="gender" name="gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="M">Male</option>
+                        <option value="F">Female</option>
+                        <option value="O">Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea class="form-control" id="address" name="address" rows="2"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="phone_number" class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" id="phone_number" name="phone_number">
+                </div>
+                <div class="mb-3">
+                    <label for="emergency_contact" class="form-label">Emergency Contact</label>
+                    <input type="text" class="form-control" id="emergency_contact" name="emergency_contact">
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <h4>Medical Information</h4>
+                <div class="mb-3">
+                    <label for="chief_complaint" class="form-label">Chief Complaint</label>
+                    <textarea class="form-control" id="chief_complaint" name="chief_complaint" rows="2" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="medical_history" class="form-label">Medical History</label>
+                    <textarea class="form-control" id="medical_history" name="medical_history" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="current_medications" class="form-label">Current Medications</label>
+                    <textarea class="form-control" id="current_medications" name="current_medications" rows="2"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="allergies" class="form-label">Allergies</label>
+                    <textarea class="form-control" id="allergies" name="allergies" rows="2"></textarea>
+                </div>
+                
+                <h4 class="mt-4">Vital Signs</h4>
+                <div class="mb-3">
+                    <label for="blood_pressure" class="form-label">Blood Pressure (mmHg)</label>
+                    <input type="text" class="form-control" id="blood_pressure" name="blood_pressure" placeholder="e.g., 120/80">
+                </div>
+                <div class="mb-3">
+                    <label for="heart_rate" class="form-label">Heart Rate (bpm)</label>
+                    <input type="number" class="form-control" id="heart_rate" name="heart_rate" min="0" max="300">
+                </div>
+                <div class="mb-3">
+                    <label for="oxygen_saturation" class="form-label">Oxygen Saturation (%)</label>
+                    <input type="number" class="form-control" id="oxygen_saturation" name="oxygen_saturation" min="0" max="100" step="0.1">
+                </div>
+                <div class="mb-3">
+                    <label for="temperature" class="form-label">Temperature (°C)</label>
+                    <input type="number" class="form-control" id="temperature" name="temperature" min="30" max="45" step="0.1">
+                </div>
+                <div class="mb-3">
+                    <label for="blood_glucose" class="form-label">Blood Glucose (mg/dL)</label>
+                    <input type="number" class="form-control" id="blood_glucose" name="blood_glucose" min="0" max="1000">
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Add Patient</button>
+            <a href="{% url 'patientsystem:dashboard' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %} 

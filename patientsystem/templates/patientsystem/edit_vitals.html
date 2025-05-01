@@ -1,0 +1,96 @@
+{% extends 'patientsystem/base.html' %}
+{% load static %}
+
+{% block title %}Edit Vitals - {{ patient.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Edit Vital Signs for {{ patient.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="blood_pressure">Blood Pressure (mmHg)</label>
+                                    <input type="text" class="form-control" id="blood_pressure" name="blood_pressure" 
+                                           value="{{ patient.vitals.blood_pressure }}" pattern="\d{2,3}/\d{2,3}" required>
+                                    <small class="form-text text-muted">Format: systolic/diastolic (e.g., 120/80)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="heart_rate">Heart Rate (bpm)</label>
+                                    <input type="number" class="form-control" id="heart_rate" name="heart_rate" 
+                                           value="{{ patient.vitals.heart_rate }}" min="30" max="200" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="oxygen_saturation">Oxygen Saturation (%)</label>
+                                    <input type="number" class="form-control" id="oxygen_saturation" name="oxygen_saturation" 
+                                           value="{{ patient.vitals.oxygen_saturation }}" min="0" max="100" step="0.1" required>
+                                    <small class="form-text text-muted">Enter value with one decimal place (e.g., 98.5)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="temperature">Temperature (°C)</label>
+                                    <input type="number" class="form-control" id="temperature" name="temperature" 
+                                           value="{{ patient.vitals.temperature }}" min="35" max="42" step="0.1" required>
+                                    <small class="form-text text-muted">Enter value with one decimal place (e.g., 37.2)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="respiratory_rate">Respiratory Rate (breaths/min)</label>
+                                    <input type="number" class="form-control" id="respiratory_rate" name="respiratory_rate" 
+                                           value="{{ patient.vitals.respiratory_rate }}" min="8" max="40" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="blood_glucose">Blood Glucose (mg/dL)</label>
+                                    <input type="number" class="form-control" id="blood_glucose" name="blood_glucose" 
+                                           value="{{ patient.vitals.blood_glucose }}" min="0" max="1000">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">Update Vitals</button>
+                            <a href="{% url 'patientsystem:patient_detail' patient.id %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Patient Summary</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> {{ patient.name }}</p>
+                    <p><strong>Age:</strong> {{ patient.age }}</p>
+                    <p><strong>Sex:</strong> {{ patient.sex }}</p>
+                    <p><strong>Chief Complaint:</strong> {{ patient.chief_complaint }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
