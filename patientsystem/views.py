@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from datetime import datetime
-from .models import Patient, Consultation, Alert, Vitals, UserProfile, LabResults, ImagingStudy, RecentEvents, Consent
+from .models import Patient, Consultation, Alert, Vitals, UserProfile, LabResults, ImagingStudy, RecentEvents, Consent, CTScanImage
 from .decorators import technician_required, neurologist_required
 
 @login_required
@@ -33,25 +33,40 @@ def dashboard(request):
 def patient_detail(request, patient_id):
     """Display patient details for both roles"""
     try:
+        # Get the patient by ID
         patient = get_object_or_404(Patient, id=patient_id)
         consultations = patient.consultations.all().order_by('-date')
         
-        # Check user role
-        is_technician = hasattr(request.user, 'userprofile') and request.user.userprofile.role == 'technician'
-        is_neurologist = hasattr(request.user, 'userprofile') and request.user.userprofile.role == 'neurologist'
+        # Get CT scan images with more debugging
+        ct_scan_images = patient.ct_scan_images.all().order_by('-uploaded_at')
+        print(f"Retrieved {ct_scan_images.count()} CT scan images for patient {patient.id}")
+        for img in ct_scan_images:
+            print(f"Image {img.id}: {img.image.name} - exists: {bool(img.image)}")
         
-        if not (is_technician or is_neurologist):
+        # Check if user is neurologist or technician
+        is_neurologist = hasattr(request.user, 'userprofile') and request.user.userprofile.role == 'neurologist'
+        is_technician = hasattr(request.user, 'userprofile') and request.user.userprofile.role == 'technician'
+        
+        if not (is_neurologist or is_technician):
             messages.error(request, 'You do not have permission to view patient details.')
             return redirect('patientsystem:dashboard')
         
-        return render(request, 'patientsystem/patient_detail.html', {
+        context = {
             'patient': patient,
             'consultations': consultations,
-            'is_technician': is_technician,
             'is_neurologist': is_neurologist,
-            'can_create_consultation': is_neurologist  # Add this to control button visibility
-        })
+            'is_technician': is_technician,
+            'ct_scan_images': ct_scan_images,
+        }
+        
+        # Debug the context
+        print(f"Context ct_scan_images length: {len(context['ct_scan_images'])}")
+        
+        return render(request, 'patientsystem/patient_detail.html', context)
     except Exception as e:
+        import traceback
+        print(f"Error in patient_detail: {str(e)}")
+        print(traceback.format_exc())
         messages.error(request, f'Error accessing patient details: {str(e)}')
         return redirect('patientsystem:dashboard')
 
@@ -189,6 +204,38 @@ def new_patient(request):
                 nihss_score=nihss_score  # Set the calculated NIHSS score
             )
             
+            # Handle symptom onset time
+            symptom_onset_time = request.POST.get('symptom_onset_time')
+            if symptom_onset_time:
+                # Create a new consultation with the symptom onset time
+                consultation = Consultation.objects.create(
+                    patient=patient,
+                    symptom_onset_time=symptom_onset_time,
+                    diagnosis="Pending neurologist evaluation",
+                    treatment_plan="Pending",
+                    vitals=vitals,
+                    nihss_score=nihss_score
+                )
+                
+                # Check for TPA window alerts
+                check_alerts(patient, consultation)
+            
+            # Handle CT scan image uploads
+            ct_scan_images = request.FILES.getlist('ct_scan_images')
+            print(f"Number of CT scans uploaded: {len(ct_scan_images)}")
+            
+            for image in ct_scan_images:
+                try:
+                    ct_image = CTScanImage.objects.create(
+                        patient=patient,
+                        image=image,
+                        description=request.POST.get('image_description', '')
+                    )
+                    print(f"Saved CT scan image: {ct_image.image.path}")
+                except Exception as img_err:
+                    print(f"Error saving image {image.name}: {str(img_err)}")
+                    messages.warning(request, f"Error saving image {image.name}: {str(img_err)}")
+            
             # Check for stroke alerts based on the NIHSS score
             if nihss_score >= 10:
                 Alert.objects.create(
@@ -208,6 +255,9 @@ def new_patient(request):
             return redirect('patientsystem:dashboard')
             
         except Exception as e:
+            import traceback
+            print(f"Error adding patient: {str(e)}")
+            print(traceback.format_exc())
             messages.error(request, f'Error adding patient: {str(e)}')
             return redirect('patientsystem:dashboard')
     
@@ -493,6 +543,29 @@ def edit_vitals(request, patient_id):
                 patient.nihss_score = patient.vitals.calculate_nihss()
                 patient.save()
                 
+                # Handle symptom onset time
+                symptom_onset_time = request.POST.get('symptom_onset_time')
+                if symptom_onset_time:
+                    # Get the latest consultation or create a new one
+                    latest_consultation = patient.consultations.order_by('-date').first()
+                    if latest_consultation:
+                        latest_consultation.symptom_onset_time = symptom_onset_time
+                        latest_consultation.save()
+                    else:
+                        # Create a new consultation with the symptom onset time
+                        from .models import Consultation
+                        new_consultation = Consultation.objects.create(
+                            patient=patient,
+                            symptom_onset_time=symptom_onset_time,
+                            diagnosis="Pending neurologist evaluation",
+                            treatment_plan="Pending",
+                            vitals=patient.vitals,
+                            nihss_score=patient.nihss_score
+                        )
+                        
+                        # Check for TPA window alerts
+                        check_alerts(patient, new_consultation)
+                
                 # Check for alerts based on the updated vitals
                 if patient.nihss_score >= 10:
                     Alert.objects.create(
@@ -590,6 +663,23 @@ def edit_patient(request, patient_id):
                 # Save the patient record
                 patient.save()
                 
+                # Handle CT scan image uploads
+                ct_scan_images = request.FILES.getlist('ct_scan_images')
+                if ct_scan_images:
+                    print(f"Number of CT scans uploaded during edit: {len(ct_scan_images)}")
+                    
+                    for image in ct_scan_images:
+                        try:
+                            ct_image = CTScanImage.objects.create(
+                                patient=patient,
+                                image=image,
+                                description=request.POST.get('image_description', '')
+                            )
+                            print(f"Saved CT scan image during edit: {ct_image.image.path}")
+                        except Exception as img_err:
+                            print(f"Error saving image {image.name}: {str(img_err)}")
+                            messages.warning(request, f"Error saving image {image.name}: {str(img_err)}")
+                
                 messages.success(request, f'Details for {patient.name} updated successfully!')
                 return redirect('patientsystem:patient_detail', patient_id=patient_id)
                 
@@ -602,4 +692,54 @@ def edit_patient(request, patient_id):
         })
     except Exception as e:
         messages.error(request, f'Error accessing patient form: {str(e)}')
+        return redirect('patientsystem:dashboard')
+
+@login_required
+@technician_required
+def upload_ct_scan(request, patient_id):
+    """Handle CT scan image upload (technician only)"""
+    try:
+        patient = get_object_or_404(Patient, id=patient_id)
+        
+        if request.method == 'POST':
+            try:
+                # Handle CT scan image uploads
+                ct_scan_images = request.FILES.getlist('ct_scan_images')
+                description = request.POST.get('image_description', '')
+                
+                if not ct_scan_images:
+                    messages.warning(request, 'No images were selected for upload.')
+                    return render(request, 'patientsystem/upload_ct_scan.html', {'patient': patient})
+                
+                print(f"Number of CT scans being uploaded: {len(ct_scan_images)}")
+                
+                uploaded_count = 0
+                for image in ct_scan_images:
+                    try:
+                        ct_image = CTScanImage.objects.create(
+                            patient=patient,
+                            image=image,
+                            description=description
+                        )
+                        print(f"Saved CT scan image: {ct_image.image.path}")
+                        uploaded_count += 1
+                    except Exception as img_err:
+                        print(f"Error saving image {image.name}: {str(img_err)}")
+                        messages.warning(request, f"Error saving image {image.name}: {str(img_err)}")
+                
+                if uploaded_count > 0:
+                    messages.success(request, f'Successfully uploaded {uploaded_count} CT scan image(s) for {patient.name}.')
+                    return redirect('patientsystem:patient_detail', patient_id=patient_id)
+                else:
+                    messages.error(request, 'Failed to upload any images. Please try again.')
+                    
+            except Exception as e:
+                messages.error(request, f'Error processing image uploads: {str(e)}')
+        
+        # GET request - display the form
+        return render(request, 'patientsystem/upload_ct_scan.html', {
+            'patient': patient
+        })
+    except Exception as e:
+        messages.error(request, f'Error accessing upload form: {str(e)}')
         return redirect('patientsystem:dashboard')

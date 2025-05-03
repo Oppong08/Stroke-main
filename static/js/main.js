@@ -2,7 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     // Patient search functionality - handle both search-input class and patient-search ID
-    const searchInputs = document.querySelectorAll('.search-input, #patient-search');
+    const searchInputs = document.querySelectorAll('.search-input:not(#patient-search)');
     
     searchInputs.forEach(searchInput => {
         if (searchInput) {

@@ -4,7 +4,7 @@
 {% block content %}
 <div class="container mt-4">
     <h2>Add New Patient</h2>
-    <form method="post" class="mt-4">
+    <form method="post" class="mt-4" enctype="multipart/form-data">
         {% csrf_token %}
         
         <div class="row">
@@ -86,9 +86,26 @@
                     <input type="number" class="form-control" id="blood_glucose" name="blood_glucose" min="0" max="1000">
                 </div>
                 
+                <div class="mb-3">
+                    <label for="symptom_onset_time" class="form-label">Symptom Onset Time</label>
+                    <input type="datetime-local" class="form-control" id="symptom_onset_time" name="symptom_onset_time">
+                    <small class="form-text text-muted">Enter the exact time when symptoms first appeared</small>
+                </div>
+                
                 <div class="alert alert-info mt-3">
                     <i class="fas fa-info-circle me-2"></i>
                     <strong>Note:</strong> The NIHSS score will be automatically calculated based on the vital signs entered above. This estimated score helps in early detection of potential stroke severity.
+                </div>
+                
+                <h4 class="mt-4">CT Scan Images</h4>
+                <div class="mb-3">
+                    <label for="ct_scan_images" class="form-label">Upload CT Scan Images</label>
+                    <input type="file" class="form-control" id="ct_scan_images" name="ct_scan_images" accept="image/*" multiple>
+                    <small class="form-text text-muted">You can select multiple images by holding Ctrl (or Cmd on Mac) while selecting files.</small>
+                </div>
+                <div class="mb-3">
+                    <label for="image_description" class="form-label">Image Description</label>
+                    <textarea class="form-control" id="image_description" name="image_description" rows="2" placeholder="Optional description for the uploaded images"></textarea>
                 </div>
             </div>
         </div>

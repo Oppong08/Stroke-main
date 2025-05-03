@@ -12,7 +12,7 @@
                     <h4 class="mb-0">Edit Patient Information for {{ patient.name }}</h4>
                 </div>
                 <div class="card-body">
-                    <form method="post">
+                    <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         
                         <div class="row mb-3">
@@ -98,6 +98,44 @@
                             <textarea class="form-control" id="allergies" name="allergies" 
                                      rows="2">{{ patient.allergies }}</textarea>
                         </div>
+
+                        <hr class="my-4">
+                        
+                        <h5 class="mb-3">CT Scan Images</h5>
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="ct_scan_images">Upload CT Scan Images</label>
+                                    <input type="file" class="form-control" id="ct_scan_images" name="ct_scan_images" multiple accept="image/*">
+                                    <small class="form-text text-muted">You can select multiple images at once.</small>
+                                </div>
+                            </div>
+                            <div class="col-12 mt-2">
+                                <div class="form-group">
+                                    <label for="image_description">Image Description</label>
+                                    <textarea class="form-control" id="image_description" name="image_description" rows="2" 
+                                             placeholder="Enter a description for these images"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if patient.ct_scan_images.all %}
+                        <div class="mb-4">
+                            <h6>Existing CT Scan Images</h6>
+                            <div class="row">
+                                {% for image in patient.ct_scan_images.all %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card">
+                                        <img src="{{ image.image_url }}" class="card-img-top" alt="CT Scan" style="height: 150px; object-fit: cover;">
+                                        <div class="card-body p-2">
+                                            <small class="text-muted">{{ image.uploaded_at|date:"F j, Y" }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
 
                         <div class="form-group mt-4">
                             <button type="submit" class="btn btn-primary">Update Patient</button>

@@ -278,6 +278,21 @@ class ImagingStudy(models.Model):
     def __str__(self):
         return f"{self.study_type} for {self.consultation.patient.name} on {self.performed_at}"
 
+class CTScanImage(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='ct_scan_images')
+    image = models.ImageField(upload_to='ct_scans/')
+    description = models.CharField(max_length=255, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"CT Scan for {self.patient.name} - {self.uploaded_at}"
+        
+    @property
+    def image_url(self):
+        if self.image and hasattr(self.image, 'url'):
+            return self.image.url
+        return "/static/img/no-image.png"
+
 class RecentEvents(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='recent_events')
     recent_surgery = models.BooleanField(default=False)

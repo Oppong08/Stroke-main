@@ -1,0 +1,72 @@
+{% extends 'patientsystem/base.html' %}
+{% load static %}
+
+{% block title %}Upload CT Scans - {{ patient.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-x-ray me-2"></i>Upload CT Scan Images for {{ patient.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> You can upload multiple CT scan images at once. These images will be viewable by neurologists reviewing this patient's case.
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="ct_scan_images" class="form-label">Select CT Scan Images</label>
+                            <input type="file" class="form-control" id="ct_scan_images" name="ct_scan_images" multiple accept="image/*" required>
+                            <div class="form-text">Accepted formats: JPG, PNG, GIF</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="image_description" class="form-label">Description (optional)</label>
+                            <textarea class="form-control" id="image_description" name="image_description" rows="3" 
+                                    placeholder="Add details about these images (e.g., 'Brain CT with contrast', 'Follow-up CT after 24 hours')"></textarea>
+                        </div>
+                        
+                        <hr>
+                        
+                        <h5 class="mb-3">Preview of Current CT Scans</h5>
+                        
+                        {% if patient.ct_scan_images.all %}
+                            <div class="row">
+                                {% for image in patient.ct_scan_images.all %}
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card">
+                                            <img src="{{ image.image_url }}" class="card-img-top" alt="CT Scan" style="height: 150px; object-fit: cover;">
+                                            <div class="card-body p-2">
+                                                <p class="mb-1"><small class="text-muted">{{ image.uploaded_at|date:"F j, Y" }}</small></p>
+                                                {% if image.description %}
+                                                    <p class="mb-0"><small>{{ image.description }}</small></p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                No CT scan images have been uploaded for this patient yet.
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">Upload Images</button>
+                            <a href="{% url 'patientsystem:patient_detail' patient.id %}" class="btn btn-secondary">Back to Patient</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -21,6 +21,35 @@
         font-size: 1.25rem;
     }
     
+    /* Breadcrumb styling */
+    .breadcrumb-wrapper {
+        background-color: #4aba91;
+        padding: 10px 0;
+        color: white;
+        margin-bottom: 20px;
+    }
+    
+    .breadcrumb {
+        margin-bottom: 0;
+        background: transparent;
+    }
+    
+    .breadcrumb-item, .breadcrumb-item a {
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: white;
+        font-weight: 600;
+    }
+    
+    .breadcrumb-item+.breadcrumb-item::before {
+        color: rgba(255, 255, 255, 0.6);
+    }
+    
+    /* Table styles */
     .table {
         border-collapse: separate;
         border-spacing: 0;
@@ -140,22 +169,24 @@
     .search-container {
         position: relative;
         width: 300px;
-        margin-bottom: 1rem;
     }
     
     .search-input {
         width: 100%;
-        padding: 10px 15px 10px 40px;
-        border-radius: 20px;
+        padding: 12px 20px;
+        border-radius: 25px;
         border: 1px solid #e2e8f0;
-        background-color: #f8fafc;
-        font-size: 0.9rem;
+        background-color: #ffffff;
+        font-size: 1rem;
         transition: all 0.3s ease;
+        text-align: center;
+        font-family: 'Poppins', sans-serif;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
     
     .search-input:focus {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+        border-color: #4aba91;
+        box-shadow: 0 0 0 3px rgba(74, 186, 145, 0.15);
         outline: none;
     }
     
@@ -165,25 +196,50 @@
         top: 50%;
         transform: translateY(-50%);
         color: #94a3b8;
+        display: none; /* Hide icon for centered text design */
+    }
+    
+    .btn-add-patient {
+        background-color: #4aba91;
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 12px 25px;
+        font-weight: 500;
+        font-family: 'Poppins', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(74, 186, 145, 0.2);
+    }
+    
+    .btn-add-patient:hover {
+        background-color: #3da07f;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(74, 186, 145, 0.25);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="header-bar mb-4 p-3 rounded" style="background-color: #0d6efd;">
-        <h1 class="text-white mb-0" style="font-family: 'Poppins', sans-serif;">Mobile Stroke Unit Patient Management</h1>
+<div class="breadcrumb-wrapper">
+    <div class="container">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-ambulance me-2"></i>
+            <h4 class="mb-0">Mobile Stroke Unit Patient Management</h4>
+        </div>
     </div>
-    
+</div>
+
+<div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="font-family: 'Poppins', sans-serif;">Patient List</h2>
-        <div class="d-flex">
+        <div class="d-flex align-items-center">
             <div class="search-container me-3">
                 <input type="text" class="search-input" id="patient-search" placeholder="Search patients...">
-                <i class="fas fa-search search-icon"></i>
             </div>
-            <a href="{% url 'patientsystem:new_patient' %}" class="btn btn-primary" style="border-radius: 20px; padding: 8px 20px;">
-                <i class="fas fa-plus"></i> Add New Patient
+            <a href="{% url 'patientsystem:new_patient' %}" class="btn-add-patient">
+                <i class="fas fa-plus me-2"></i> Add New Patient
             </a>
         </div>
     </div>
@@ -215,21 +271,21 @@
                         </span>
                     </td>
                     <td>
-                        <span class="badge {% if patient.nihss_score > 15 %}bg-danger{% elif patient.nihss_score > 10 %}bg-warning{% elif patient.nihss_score > 5 %}bg-info{% else %}bg-success{% endif %}">
+                        <span class="badge nihss-score {% if patient.nihss_score > 15 %}bg-danger{% elif patient.nihss_score > 10 %}bg-warning{% elif patient.nihss_score > 5 %}bg-info{% else %}bg-success{% endif %}">
                             {{ patient.nihss_score }}
                         </span>
                     </td>
                     <td>
-                        <span class="badge {% if patient.tpa_status == 'Approved' %}bg-success{% elif patient.tpa_status == 'Pending' %}bg-warning{% else %}bg-secondary{% endif %}">
+                        <span class="badge tpa-status {% if patient.tpa_status == 'Approved' %}bg-success{% elif patient.tpa_status == 'Pending' %}bg-warning{% else %}bg-secondary{% endif %}">
                             {{ patient.tpa_status }}
                         </span>
                     </td>
                     <td>
-                        <span class="badge bg-warning text-dark">
+                        <span class="badge bg-warning text-dark chief-complaint">
                             {{ patient.chief_complaint }}
                         </span>
                     </td>
-                    <td>{{ patient.updated_at|date:"Y-m-d H:i" }}</td>
+                    <td class="updated-at">{{ patient.updated_at|date:"Y-m-d H:i" }}</td>
                     <td>
                         <a href="{% url 'patientsystem:patient_detail' patient.id %}" 
                            class="btn btn-sm btn-primary" 
@@ -278,9 +334,7 @@
 
 {% block extra_js %}
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-<script src="{% static 'js/main.js' %}"></script>
 <script>
-    // Check if the page is loaded after redirecting from adding a patient
     document.addEventListener("DOMContentLoaded", function() {
         // If there's a success message, refresh after 500ms to ensure DB is fully updated
         const alertMessages = document.querySelectorAll('.alert-success');
@@ -295,6 +349,78 @@
             } else {
                 // Clear the flag after refresh
                 sessionStorage.removeItem('pageRefreshed');
+            }
+        }
+        
+        // Improved Patient search functionality
+        const searchInput = document.getElementById('patient-search');
+        if (searchInput) {
+            const performSearch = function() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                const patientTable = document.querySelector('.table-responsive table');
+                if (!patientTable) return;
+                
+                const tbody = patientTable.querySelector('tbody');
+                const patientRows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)'));
+                
+                // Show/hide rows based on search term
+                let matchFound = false;
+                patientRows.forEach(row => {
+                    const patientName = row.querySelector('.patient-name')?.textContent.toLowerCase().trim() || '';
+                    const patientId = row.querySelector('.patient-id')?.textContent.toLowerCase().trim() || '';
+                    const complaint = row.querySelector('.chief-complaint')?.textContent.toLowerCase().trim() || '';
+                    const tpaStatus = row.querySelector('.tpa-status')?.textContent.toLowerCase().trim() || '';
+                    const nihssScore = row.querySelector('.nihss-score')?.textContent.toLowerCase().trim() || '';
+                    const updatedAt = row.querySelector('.updated-at')?.textContent.toLowerCase().trim() || '';
+                    
+                    // Check if any of the fields contain the search term
+                    const isMatch = patientName.includes(searchTerm) || 
+                                   patientId.includes(searchTerm) || 
+                                   complaint.includes(searchTerm) ||
+                                   tpaStatus.includes(searchTerm) || 
+                                   nihssScore.includes(searchTerm) ||
+                                   updatedAt.includes(searchTerm) ||
+                                   row.textContent.toLowerCase().includes(searchTerm);
+                    
+                    row.style.display = isMatch ? '' : 'none';
+                    if (isMatch) matchFound = true;
+                });
+                
+                // Show "No results" message if no matches
+                let emptyRow = tbody.querySelector('.empty-row');
+                if (!matchFound && searchTerm.length > 0) {
+                    if (!emptyRow) {
+                        emptyRow = document.createElement('tr');
+                        emptyRow.className = 'empty-row';
+                        const emptyCell = document.createElement('td');
+                        emptyCell.colSpan = 9;
+                        emptyCell.className = 'text-center py-4';
+                        emptyCell.innerHTML = `<i class="fas fa-search mr-2"></i> No matching patients found for "${searchTerm}"`;
+                        emptyRow.appendChild(emptyCell);
+                        tbody.appendChild(emptyRow);
+                    } else {
+                        emptyRow.style.display = '';
+                        emptyRow.querySelector('td').innerHTML = `<i class="fas fa-search mr-2"></i> No matching patients found for "${searchTerm}"`;
+                    }
+                } else if (emptyRow) {
+                    emptyRow.style.display = 'none';
+                }
+            };
+            
+            // Add input event listener
+            searchInput.addEventListener('input', performSearch);
+            
+            // Clear search on escape key
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    this.value = '';
+                    performSearch();
+                }
+            });
+            
+            // Initial search if there's a value (e.g., from browser autofill)
+            if (searchInput.value.trim().length > 0) {
+                performSearch();
             }
         }
     });

@@ -14,6 +14,37 @@
         background-color: rgba(220, 53, 69, 0.15);
         border-left: 4px solid #dc3545;
     }
+    
+    .ct-scan-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .ct-scan-item {
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .ct-scan-image {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        cursor: pointer;
+    }
+    
+    .ct-scan-caption {
+        padding: 8px;
+        font-size: 0.85rem;
+        background-color: #f8f9fa;
+    }
+    
+    .modal-image {
+        max-width: 100%;
+        max-height: 80vh;
+    }
 </style>
 {% endblock %}
 
@@ -60,6 +91,52 @@
                 </div>
             </div>
 
+            <!-- CT Scan Images Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-x-ray me-2"></i>CT Scan Images</h5>
+                </div>
+                <div class="card-body">
+                    {% if is_technician %}
+                    <div class="mb-3 text-end">
+                        <a href="{% url 'patientsystem:upload_ct_scan' patient.id %}" class="btn btn-success">
+                            <i class="fas fa-upload me-2"></i>Upload CT Scans
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if ct_scan_images %}
+                        <div class="ct-scan-gallery">
+                            {% for image in ct_scan_images %}
+                                <div class="ct-scan-item border rounded">
+                                    <img src="{{ image.image_url }}" 
+                                         class="img-fluid" alt="CT Scan" 
+                                         style="max-height: 200px; width: 100%; object-fit: cover;">
+                                    <div class="p-2 bg-light">
+                                        <div>{{ image.uploaded_at|date:"F j, Y" }}</div>
+                                        {% if image.description %}
+                                            <small>{{ image.description }}</small>
+                                        {% endif %}
+                                        <p><a href="{{ image.image_url }}" target="_blank" class="btn btn-sm btn-primary mt-1">View Full Size</a></p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-x-ray fa-4x text-muted mb-3"></i>
+                            <h4 class="text-muted">No CT Scan Images Available</h4>
+                            <p class="text-muted">No CT scan images have been uploaded for this patient.</p>
+                            {% if is_technician %}
+                            <a href="{% url 'patientsystem:upload_ct_scan' patient.id %}" class="btn btn-primary mt-3">
+                                <i class="fas fa-upload me-2"></i>Upload CT Scan Images
+                            </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
             <div class="card mb-4">
                 <div class="card-header">
                     <h5 class="mb-0">Recent Consultations</h5>
@@ -84,6 +161,9 @@
                                     <p class="mb-1"><strong>Treatment Plan:</strong> {{ consultation.treatment_plan }}</p>
                                     {% if consultation.test_orders %}
                                         <p class="mb-1"><strong>Test Orders:</strong> {{ consultation.test_orders }}</p>
+                                    {% endif %}
+                                    {% if consultation.symptom_onset_time %}
+                                        <p class="mb-1"><strong>Symptom Onset Time:</strong> {{ consultation.symptom_onset_time|date:"F j, Y, g:i a" }}</p>
                                     {% endif %}
                                     
                                     <!-- TPA Approval Status -->
@@ -189,6 +269,11 @@
                     <div class="vitals-timestamp">
                         Last updated: {{ patient.nihss_last_updated|date:"F j, Y, g:i a" }}
                     </div>
+                    {% if patient.consultations.last.symptom_onset_time %}
+                    <div class="mt-2 p-2 bg-light rounded">
+                        <strong>Symptom Onset:</strong> {{ patient.consultations.last.symptom_onset_time|date:"F j, Y, g:i a" }}
+                    </div>
+                    {% endif %}
                     {% else %}
                     <p>No vital signs recorded yet.</p>
                     {% endif %}
