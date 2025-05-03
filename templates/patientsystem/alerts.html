@@ -53,187 +53,60 @@
     <!-- Active Alerts Section -->
     <h3 class="section-title mb-3">Active Alerts</h3>
     <div class="alerts-list">
-        <!-- Critical Stroke Alert -->
-        <div class="alert-card critical">
+        {% for alert in alerts %}
+        {% if not alert.acknowledged %}
+        <div class="alert-card {% if alert.type == 'critical' %}critical{% elif alert.type == 'warning' %}warning{% else %}info{% endif %}">
             <div class="alert-header">
                 <div class="alert-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
+                    <i class="fas fa-exclamation-{% if alert.type == 'critical' %}triangle{% elif alert.type == 'warning' %}circle{% else %}info{% endif %}"></i>
                 </div>
                 <div class="alert-title-container">
-                    <div class="alert-type">CRITICAL</div>
-                    <div class="alert-timestamp">2025-04-29 01:25</div>
+                    <div class="alert-type">{{ alert.get_type_display|upper }}</div>
+                    <div class="alert-timestamp">{{ alert.timestamp|date:"Y-m-d H:i" }}</div>
                 </div>
             </div>
             <div class="alert-content">
-                <p class="alert-description">SEVERE STROKE ALERT: NIHSS score 18 indicates major stroke. Immediate intervention required.</p>
+                <p class="alert-description">{{ alert.description }}</p>
                 <div class="alert-meta">
                     <div class="patient-id">
                         <i class="fas fa-user"></i>
-                        Patient ID: 48
+                        Patient ID: {{ alert.patient.id }}
                     </div>
                 </div>
                 <div class="alert-actions">
                     <div class="action-buttons">
-                        <a href="/patient/48/" class="btn btn-view">
+                        <a href="{% url 'patientsystem:patient_detail' alert.patient.id %}" class="btn btn-view">
                             <i class="fas fa-eye"></i>View Patient
                         </a>
-                        <form method="post" action="/alert/1/acknowledge/" style="display: inline;">
+                        {% if not alert.acknowledged %}
+                        <form method="post" action="{% url 'patientsystem:acknowledge_alert' alert.id %}" style="display: inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-acknowledge">
                                 <i class="fas fa-check"></i>Acknowledge
                             </button>
                         </form>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Elevated Glucose Alert -->
-        <div class="alert-card warning">
-            <div class="alert-header">
-                <div class="alert-icon">
-                    <i class="fas fa-exclamation-circle"></i>
-                </div>
-                <div class="alert-title-container">
-                    <div class="alert-type">WARNING</div>
-                    <div class="alert-timestamp">2025-04-29 01:25</div>
-                </div>
+        {% endif %}
+        {% empty %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-check-circle"></i>
             </div>
-            <div class="alert-content">
-                <p class="alert-description">ELEVATED BLOOD GLUCOSE: 196 mg/dL. Monitor for hyperglycemia.</p>
-                <div class="alert-meta">
-                    <div class="patient-id">
-                        <i class="fas fa-user"></i>
-                        Patient ID: 47
-                    </div>
-                </div>
-                <div class="alert-actions">
-                    <div class="action-buttons">
-                        <a href="/patient/47/" class="btn btn-view">
-                            <i class="fas fa-eye"></i>View Patient
-                        </a>
-                        <form method="post" action="/alert/2/acknowledge/" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-acknowledge">
-                                <i class="fas fa-check"></i>Acknowledge
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
+            <div class="empty-state-text">No active alerts</div>
+            <div>All alerts have been acknowledged</div>
         </div>
-        
-        <!-- Critical Stroke Alert -->
-        <div class="alert-card critical">
-            <div class="alert-header">
-                <div class="alert-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <div class="alert-title-container">
-                    <div class="alert-type">CRITICAL</div>
-                    <div class="alert-timestamp">2025-04-29 01:25</div>
-                </div>
-            </div>
-            <div class="alert-content">
-                <p class="alert-description">SEVERE STROKE ALERT: NIHSS score 12 indicates major stroke. Immediate intervention required.</p>
-                <div class="alert-meta">
-                    <div class="patient-id">
-                        <i class="fas fa-user"></i>
-                        Patient ID: 46
-                    </div>
-                </div>
-                <div class="alert-actions">
-                    <div class="action-buttons">
-                        <a href="/patient/46/" class="btn btn-view">
-                            <i class="fas fa-eye"></i>View Patient
-                        </a>
-                        <form method="post" action="/alert/3/acknowledge/" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-acknowledge">
-                                <i class="fas fa-check"></i>Acknowledge
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Critical Stroke Alert -->
-        <div class="alert-card critical">
-            <div class="alert-header">
-                <div class="alert-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <div class="alert-title-container">
-                    <div class="alert-type">CRITICAL</div>
-                    <div class="alert-timestamp">2025-04-29 01:25</div>
-                </div>
-            </div>
-            <div class="alert-content">
-                <p class="alert-description">SEVERE STROKE ALERT: NIHSS score 15 indicates major stroke. Immediate intervention required.</p>
-                <div class="alert-meta">
-                    <div class="patient-id">
-                        <i class="fas fa-user"></i>
-                        Patient ID: 45
-                    </div>
-                </div>
-                <div class="alert-actions">
-                    <div class="action-buttons">
-                        <a href="/patient/45/" class="btn btn-view">
-                            <i class="fas fa-eye"></i>View Patient
-                        </a>
-                        <form method="post" action="/alert/4/acknowledge/" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-acknowledge">
-                                <i class="fas fa-check"></i>Acknowledge
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Critical Stroke Alert -->
-        <div class="alert-card critical">
-            <div class="alert-header">
-                <div class="alert-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <div class="alert-title-container">
-                    <div class="alert-type">CRITICAL</div>
-                    <div class="alert-timestamp">2025-04-29 01:25</div>
-                </div>
-            </div>
-            <div class="alert-content">
-                <p class="alert-description">SEVERE STROKE ALERT: NIHSS score 13 indicates major stroke. Immediate intervention required.</p>
-                <div class="alert-meta">
-                    <div class="patient-id">
-                        <i class="fas fa-user"></i>
-                        Patient ID: 44
-                    </div>
-                </div>
-                <div class="alert-actions">
-                    <div class="action-buttons">
-                        <a href="/patient/44/" class="btn btn-view">
-                            <i class="fas fa-eye"></i>View Patient
-                        </a>
-                        <form method="post" action="/alert/5/acknowledge/" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-acknowledge">
-                                <i class="fas fa-check"></i>Acknowledge
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
     
     <!-- Footer Actions -->
     <div class="footer-actions mt-4 mb-5">
         <div class="d-flex justify-content-between align-items-center p-3 bg-white rounded-3 shadow-sm">
             <div>
-                <span class="text-muted">Showing 5 of 5 alerts</span>
+                <span class="text-muted">Showing {{ alerts|length }} alerts</span>
             </div>
             <div>
                 <button type="button" class="btn btn-primary">
@@ -245,12 +118,51 @@
 
     <!-- Acknowledged Alerts Section -->
     <h3 class="section-title mb-3">Acknowledged Alerts</h3>
-    <div class="empty-state">
-        <div class="empty-state-icon">
-            <i class="fas fa-check-circle"></i>
+    <div class="alerts-list">
+        {% for alert in alerts %}
+        {% if alert.acknowledged %}
+        <div class="alert-card {% if alert.type == 'critical' %}critical{% elif alert.type == 'warning' %}warning{% else %}info{% endif %} acknowledged">
+            <div class="alert-header">
+                <div class="alert-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="alert-title-container">
+                    <div class="alert-type">{{ alert.get_type_display|upper }} - ACKNOWLEDGED</div>
+                    <div class="alert-timestamp">{{ alert.timestamp|date:"Y-m-d H:i" }}</div>
+                </div>
+            </div>
+            <div class="alert-content">
+                <p class="alert-description">{{ alert.description }}</p>
+                <div class="alert-meta">
+                    <div class="patient-id">
+                        <i class="fas fa-user"></i>
+                        Patient ID: {{ alert.patient.id }}
+                    </div>
+                    <div class="ack-info">
+                        <small>Acknowledged by {{ alert.acknowledged_by.username }} at {{ alert.acknowledged_at|date:"Y-m-d H:i" }}</small>
+                    </div>
+                </div>
+                <div class="alert-actions">
+                    <div class="action-buttons">
+                        <a href="{% url 'patientsystem:patient_detail' alert.patient.id %}" class="btn btn-view">
+                            <i class="fas fa-eye"></i>View Patient
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="empty-state-text">No acknowledged alerts</div>
-        <div>All alerts require attention</div>
+        {% endif %}
+        {% endfor %}
+        
+        {% if not alerts|dictsortreversed:"acknowledged"|first %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <div class="empty-state-text">No acknowledged alerts</div>
+            <div>All alerts require attention</div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

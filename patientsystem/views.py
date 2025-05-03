@@ -335,12 +335,22 @@ def check_alerts(patient, consultation):
 def acknowledge_alert(request, alert_id):
     """Handle alert acknowledgment by neurologist"""
     try:
+        # Print debug information
+        print(f"Attempting to acknowledge alert with ID: {alert_id}")
+        print(f"Available alert IDs: {list(Alert.objects.values_list('id', flat=True))}")
+        
+        # Check if alert exists
+        if not Alert.objects.filter(id=alert_id).exists():
+            messages.error(request, f"Error: Alert with ID {alert_id} does not exist")
+            return redirect('patientsystem:alerts')
+            
         alert = get_object_or_404(Alert, id=alert_id)
         alert.acknowledge(request.user)
         messages.success(request, 'Alert acknowledged successfully')
+        return redirect('patientsystem:alerts')  # Redirect to alerts page instead of dashboard
     except Exception as e:
         messages.error(request, f'Error acknowledging alert: {str(e)}')
-    return redirect('patientsystem:dashboard')
+        return redirect('patientsystem:alerts')  # Redirect to alerts page for better user experience
 
 def register(request):
     """Handle user registration with role selection"""
