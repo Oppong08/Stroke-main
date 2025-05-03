@@ -2,7 +2,7 @@ import os
 from settings import *
 
 # Security settings
-DEBUG = False
+DEBUG = True  # Temporarily set to True to get detailed error messages
 # Read the Render external URL from env var, fallback allows local testing if needed
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 ALLOWED_HOSTS = []
