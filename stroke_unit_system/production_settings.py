@@ -9,7 +9,7 @@ ALLOWED_HOSTS = []
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 # Add other hosts like localhost if necessary for health checks or local access
-# ALLOWED_HOSTS.extend(['localhost', '127.0.0.1']) 
+ALLOWED_HOSTS.extend(['localhost', '127.0.0.1']) 
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-secret-key-here')  # Replace with a secure key
 
@@ -27,7 +27,7 @@ DATABASES = {
 
 # Static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage' # Use ManifestStaticFilesStorage for production
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'  # Use basic storage instead of ManifestStaticFilesStorage
 
 # Security middleware settings
 SECURE_SSL_REDIRECT = True
