@@ -3,37 +3,14 @@ from settings import *
 
 # Security settings
 DEBUG = False
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']  # For local testing
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-w9q@_cm&ta)b4we2@ccwba&qtx9e2iwc5@=3=yg*1!zh(crah7')
+# Read the Render external URL from env var, fallback allows local testing if needed
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+ALLOWED_HOSTS = []
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+# Add other hosts like localhost if necessary for health checks or local access
+# ALLOWED_HOSTS.extend(['localhost', '127.0.0.1']) 
 
-# Database settings - Using SQLite for local testing
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-# Static files
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
-
-# Security middleware settings
-SECURE_SSL_REDIRECT = False  # Disabled for local testing
-SESSION_COOKIE_SECURE = False  # Disabled for local testing
-CSRF_COOKIE_SECURE = False  # Disabled for local testing
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_HSTS_SECONDS = 0  # Disabled for local testing
-SECURE_HSTS_INCLUDE_SUBDOMAINS = False  # Disabled for local testing
-SECURE_HSTS_PRELOAD = False  # Disabled for local testing
-
-# Email settings
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For local testing
-
-# Security settings
-DEBUG = False
-ALLOWED_HOSTS = ['your-domain.com', 'www.your-domain.com']  # Replace with your actual domain
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-secret-key-here')  # Replace with a secure key
 
 # Database settings
@@ -50,7 +27,7 @@ DATABASES = {
 
 # Static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage' # Use ManifestStaticFilesStorage for production
 
 # Security middleware settings
 SECURE_SSL_REDIRECT = True
