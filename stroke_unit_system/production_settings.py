@@ -1,4 +1,4 @@
-from .settings import *
+from settings import *
 
 # Security settings
 DEBUG = False
