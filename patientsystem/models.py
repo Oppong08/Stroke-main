@@ -14,6 +14,59 @@ class Vitals(models.Model):
     
     def __str__(self):
         return f"BP: {self.blood_pressure}, HR: {self.heart_rate}, O2: {self.oxygen_saturation}%, Temp: {self.temperature}°C, RR: {self.respiratory_rate}"
+        
+    def calculate_nihss(self):
+        """
+        Calculate an estimated NIHSS score based on vital signs.
+        This is a simplified estimation algorithm - not a clinically validated approach.
+        In a real system, this would be based on actual neurological examination findings.
+        """
+        score = 0
+        
+        # BP contribution - high BP often associated with more severe strokes
+        try:
+            systolic, diastolic = map(int, self.blood_pressure.split('/'))
+            if systolic > 180 or diastolic > 110:
+                score += 6  # Severe hypertension
+            elif systolic > 160 or diastolic > 100:
+                score += 4  # Moderate hypertension
+            elif systolic > 140 or diastolic > 90:
+                score += 2  # Mild hypertension
+        except (ValueError, TypeError):
+            # Handle cases where BP might not be properly formatted
+            pass
+            
+        # Heart rate contribution - abnormal heart rate may indicate more severe cases
+        if self.heart_rate > 120:
+            score += 3  # Severe tachycardia
+        elif self.heart_rate > 100:
+            score += 2  # Moderate tachycardia
+        elif self.heart_rate < 60:
+            score += 2  # Bradycardia
+            
+        # Oxygen saturation contribution - low O2 sat can worsen brain injury
+        if self.oxygen_saturation < 90:
+            score += 4  # Severe hypoxemia
+        elif self.oxygen_saturation < 94:
+            score += 2  # Moderate hypoxemia
+            
+        # Temperature contribution - fever can worsen outcomes
+        if self.temperature > 38.5:
+            score += 3  # High fever
+        elif self.temperature > 37.5:
+            score += 1  # Mild fever
+            
+        # Blood glucose contribution - hyperglycemia associated with worse outcomes
+        if self.blood_glucose:
+            if self.blood_glucose > 300:
+                score += 3  # Severe hyperglycemia
+            elif self.blood_glucose > 180:
+                score += 2  # Moderate hyperglycemia
+            elif self.blood_glucose < 60:
+                score += 3  # Hypoglycemia
+                
+        # Limit score to valid NIHSS range (0-42)
+        return min(max(score, 0), 42)
 
 class Patient(models.Model):
     GENDER_CHOICES = [
@@ -66,6 +119,17 @@ class Patient(models.Model):
     @property
     def sex(self):
         return 'Male' if self.gender == 'M' else 'Female' if self.gender == 'F' else 'Other'
+        
+    @property
+    def tpa_status(self):
+        """Return TPA status from most recent consultation"""
+        latest_consultation = self.consultations.order_by('-date').first()
+        if not latest_consultation:
+            return 'No Data'
+        
+        if latest_consultation.tpa_approved:
+            return 'Approved'
+        return 'Not Approved'
 
 class Consultation(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='consultations')
@@ -76,6 +140,8 @@ class Consultation(models.Model):
     test_orders = models.TextField(blank=True)
     vitals = models.OneToOneField(Vitals, on_delete=models.CASCADE)
     nihss_score = models.IntegerField()
+    tpa_approved = models.BooleanField(default=False, verbose_name="TPA Approved")
+    tpa_approval_notes = models.TextField(blank=True, verbose_name="TPA Approval Notes")
     
     def __str__(self):
         return f"Consultation for {self.patient.name} on {self.date}"

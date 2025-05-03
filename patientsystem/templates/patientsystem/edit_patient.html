@@ -1,0 +1,112 @@
+{% extends 'patientsystem/base.html' %}
+{% load static %}
+
+{% block title %}Edit Patient Details - {{ patient.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Edit Patient Information for {{ patient.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="first_name">First Name</label>
+                                    <input type="text" class="form-control" id="first_name" name="first_name" 
+                                           value="{{ patient.first_name }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="last_name">Last Name</label>
+                                    <input type="text" class="form-control" id="last_name" name="last_name" 
+                                           value="{{ patient.last_name }}" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="date_of_birth">Date of Birth</label>
+                                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" 
+                                           value="{{ patient.date_of_birth|date:'Y-m-d' }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="gender">Gender</label>
+                                    <select class="form-control" id="gender" name="gender" required>
+                                        <option value="M" {% if patient.gender == 'M' %}selected{% endif %}>Male</option>
+                                        <option value="F" {% if patient.gender == 'F' %}selected{% endif %}>Female</option>
+                                        <option value="O" {% if patient.gender == 'O' %}selected{% endif %}>Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="chief_complaint">Chief Complaint</label>
+                            <textarea class="form-control" id="chief_complaint" name="chief_complaint" 
+                                     rows="2">{{ patient.chief_complaint }}</textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="address">Address</label>
+                            <textarea class="form-control" id="address" name="address" 
+                                     rows="2">{{ patient.address }}</textarea>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="phone_number">Phone Number</label>
+                                    <input type="text" class="form-control" id="phone_number" name="phone_number" 
+                                           value="{{ patient.phone_number }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="emergency_contact">Emergency Contact</label>
+                                    <input type="text" class="form-control" id="emergency_contact" name="emergency_contact" 
+                                           value="{{ patient.emergency_contact }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="medical_history">Medical History</label>
+                            <textarea class="form-control" id="medical_history" name="medical_history" 
+                                     rows="3">{{ patient.medical_history }}</textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="current_medications">Current Medications</label>
+                            <textarea class="form-control" id="current_medications" name="current_medications" 
+                                     rows="3">{{ patient.current_medications }}</textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="allergies">Allergies</label>
+                            <textarea class="form-control" id="allergies" name="allergies" 
+                                     rows="2">{{ patient.allergies }}</textarea>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">Update Patient</button>
+                            <a href="{% url 'patientsystem:patient_detail' patient.id %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -3,6 +3,20 @@
 
 {% block title %}{{ patient.name }} - Patient Details{% endblock %}
 
+{% block extra_css %}
+<style>
+    .bg-success-light {
+        background-color: rgba(25, 135, 84, 0.15);
+        border-left: 4px solid #198754;
+    }
+    
+    .bg-danger-light {
+        background-color: rgba(220, 53, 69, 0.15);
+        border-left: 4px solid #dc3545;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <div class="row">
@@ -51,19 +65,41 @@
                     <h5 class="mb-0">Recent Consultations</h5>
                 </div>
                 <div class="card-body">
-                    {% if recent_consultations %}
+                    {% if consultations %}
                         <div class="list-group">
-                            {% for consultation in recent_consultations %}
+                            {% for consultation in consultations %}
                                 <div class="list-group-item">
                                     <div class="d-flex w-100 justify-content-between">
                                         <h6 class="mb-1">Consultation on {{ consultation.date|date:"F j, Y, g:i a" }}</h6>
-                                        <small>NIHSS: {{ consultation.nihss_score }}</small>
+                                        <div>
+                                            <small class="mr-2">NIHSS: {{ consultation.nihss_score }}</small>
+                                            {% if is_neurologist %}
+                                            <a href="{% url 'patientsystem:edit_consultation' consultation.id %}" class="btn btn-sm btn-outline-primary ml-2">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                     <p class="mb-1"><strong>Diagnosis:</strong> {{ consultation.diagnosis }}</p>
                                     <p class="mb-1"><strong>Treatment Plan:</strong> {{ consultation.treatment_plan }}</p>
                                     {% if consultation.test_orders %}
                                         <p class="mb-1"><strong>Test Orders:</strong> {{ consultation.test_orders }}</p>
                                     {% endif %}
+                                    
+                                    <!-- TPA Approval Status -->
+                                    <div class="mt-2 p-2 {% if consultation.tpa_approved %}bg-success-light{% else %}bg-danger-light{% endif %} rounded">
+                                        <p class="mb-0">
+                                            <strong>TPA Status:</strong> 
+                                            {% if consultation.tpa_approved %}
+                                                <span class="badge bg-success">APPROVED</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">NOT APPROVED</span>
+                                            {% endif %}
+                                        </p>
+                                        {% if consultation.tpa_approval_notes %}
+                                            <p class="mb-0 small mt-1"><strong>Notes:</strong> {{ consultation.tpa_approval_notes }}</p>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             {% endfor %}
                         </div>
@@ -80,9 +116,18 @@
                     <h5 class="mb-0">Quick Actions</h5>
                 </div>
                 <div class="card-body">
+                    {% if is_neurologist %}
                     <a href="{% url 'patientsystem:new_consultation' patient.id %}" class="btn btn-primary btn-block mb-2">
                         New Consultation
                     </a>
+                    {% endif %}
+                    
+                    {% if is_technician %}
+                    <a href="{% url 'patientsystem:edit_patient' patient.id %}" class="btn btn-primary btn-block mb-2">
+                        <i class="fas fa-user-edit"></i> Edit Patient Details
+                    </a>
+                    {% endif %}
+                    
                     <a href="{% url 'patientsystem:alerts' %}" class="btn btn-warning btn-block">
                         View Alerts
                     </a>
@@ -100,6 +145,56 @@
                         </h2>
                         <p class="text-muted">Last updated: {{ patient.nihss_last_updated|date:"F j, Y, g:i a" }}</p>
                     </div>
+                </div>
+            </div>
+
+            <!-- Vital Signs Card -->
+            <div class="status-card">
+                <div class="status-card-header">
+                    <i class="fas fa-heartbeat"></i>
+                    <h3>Latest Vital Signs</h3>
+                </div>
+                <div class="status-card-body">
+                    {% if patient.vitals %}
+                    <div class="vitals-grid">
+                        <div class="vital-card">
+                            <div class="vital-label">Blood Pressure</div>
+                            <div class="vital-value">{{ patient.vitals.blood_pressure }} <span class="vital-unit">mmHg</span></div>
+                        </div>
+                        <div class="vital-card">
+                            <div class="vital-label">Heart Rate</div>
+                            <div class="vital-value">{{ patient.vitals.heart_rate }} <span class="vital-unit">bpm</span></div>
+                        </div>
+                        <div class="vital-card">
+                            <div class="vital-label">O2 Saturation</div>
+                            <div class="vital-value">{{ patient.vitals.oxygen_saturation }} <span class="vital-unit">%</span></div>
+                        </div>
+                        <div class="vital-card">
+                            <div class="vital-label">Temperature</div>
+                            <div class="vital-value">{{ patient.vitals.temperature }} <span class="vital-unit">°C</span></div>
+                        </div>
+                        {% if patient.vitals.respiratory_rate %}
+                        <div class="vital-card">
+                            <div class="vital-label">Resp. Rate</div>
+                            <div class="vital-value">{{ patient.vitals.respiratory_rate }} <span class="vital-unit">breaths/min</span></div>
+                        </div>
+                        {% endif %}
+                        {% if patient.vitals.blood_glucose %}
+                        <div class="vital-card">
+                            <div class="vital-label">Blood Glucose</div>
+                            <div class="vital-value">{{ patient.vitals.blood_glucose }} <span class="vital-unit">mg/dL</span></div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="vitals-timestamp">
+                        Last updated: {{ patient.nihss_last_updated|date:"F j, Y, g:i a" }}
+                    </div>
+                    {% else %}
+                    <p>No vital signs recorded yet.</p>
+                    {% endif %}
+                    {% if is_technician %}
+                    <a href="{% url 'patientsystem:edit_vitals' patient.id %}" class="btn btn-sm btn-outline-secondary mt-3">Edit Vitals</a>
+                    {% endif %}
                 </div>
             </div>
         </div>

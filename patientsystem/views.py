@@ -16,13 +16,16 @@ def dashboard(request):
         defaults={'role': 'technician'}
     )
     
+    # Force a fresh database query for all patients, ordered by most recently updated
+    all_patients = Patient.objects.all().order_by('-updated_at')
+    
     if user_profile.role == 'technician':
         return render(request, 'patientsystem/technician_dashboard.html', {
-            'patients': Patient.objects.all()
+            'patients': all_patients
         })
     else:  # neurologist
         return render(request, 'patientsystem/neurologist_dashboard.html', {
-            'patients': Patient.objects.all(),
+            'patients': all_patients,
             'alerts': Alert.objects.filter(acknowledged=False).order_by('-timestamp')[:5]
         })
 
@@ -61,8 +64,8 @@ def new_consultation(request, patient_id):
         
         if request.method == 'POST':
             try:
-                # Create new Vitals record
-                vitals = Vitals.objects.create(
+                # Create new Vitals record specific to this consultation
+                consultation_vitals = Vitals.objects.create(
                     blood_pressure=request.POST['blood_pressure'],
                     heart_rate=int(request.POST['heart_rate']),
                     oxygen_saturation=float(request.POST['oxygen_saturation']),
@@ -77,8 +80,10 @@ def new_consultation(request, patient_id):
                     diagnosis=request.POST['diagnosis'],
                     treatment_plan=request.POST['treatment_plan'],
                     test_orders=request.POST.get('test_orders', ''),
-                    vitals=vitals,
-                    nihss_score=int(request.POST['nihss_score'])
+                    vitals=consultation_vitals,  # Link the consultation-specific vitals
+                    nihss_score=int(request.POST['nihss_score']), # Store NIHSS assessed during consultation
+                    tpa_approved=request.POST.get('tpa_approved') == 'yes',  # Set TPA approval status
+                    tpa_approval_notes=request.POST.get('tpa_approval_notes', '')  # Store TPA approval notes
                 )
                 
                 # Create Lab Results record
@@ -115,12 +120,7 @@ def new_consultation(request, patient_id):
                     relationship_to_patient=request.POST['relationship_to_patient']
                 )
                 
-                # Update patient's NIHSS score
-                patient.nihss_score = consultation.nihss_score
-                patient.vitals = vitals
-                patient.save()
-                
-                # Check for alerts
+                # Check for alerts based on the data from *this* consultation
                 check_alerts(patient, consultation)
                 
                 messages.success(request, 'Consultation submitted successfully')
@@ -163,11 +163,14 @@ def new_patient(request):
             # Create new Vitals record
             vitals = Vitals.objects.create(
                 blood_pressure=request.POST.get('blood_pressure'),
-                heart_rate=request.POST.get('heart_rate'),
-                oxygen_saturation=request.POST.get('oxygen_saturation'),
-                temperature=request.POST.get('temperature'),
-                blood_glucose=request.POST.get('blood_glucose')
+                heart_rate=int(request.POST.get('heart_rate')) if request.POST.get('heart_rate') else 0,
+                oxygen_saturation=float(request.POST.get('oxygen_saturation')) if request.POST.get('oxygen_saturation') else 0,
+                temperature=float(request.POST.get('temperature')) if request.POST.get('temperature') else 0,
+                blood_glucose=int(request.POST.get('blood_glucose')) if request.POST.get('blood_glucose') else None
             )
+            
+            # Automatically calculate NIHSS score from vitals
+            nihss_score = vitals.calculate_nihss()
             
             # Create new Patient record
             patient = Patient.objects.create(
@@ -182,11 +185,27 @@ def new_patient(request):
                 medical_history=request.POST.get('medical_history'),
                 current_medications=request.POST.get('current_medications'),
                 allergies=request.POST.get('allergies'),
-                vitals=vitals
+                vitals=vitals,
+                nihss_score=nihss_score  # Set the calculated NIHSS score
             )
             
-            messages.success(request, 'Patient added successfully!')
-            return redirect('patientsystem:patient_detail', patient_id=patient.id)
+            # Check for stroke alerts based on the NIHSS score
+            if nihss_score >= 10:
+                Alert.objects.create(
+                    type='critical',
+                    description=f'SEVERE STROKE ALERT: NIHSS score {nihss_score} indicates major stroke. Immediate intervention required.',
+                    patient=patient
+                )
+            elif nihss_score >= 4:
+                Alert.objects.create(
+                    type='warning',
+                    description=f'MODERATE STROKE ALERT: NIHSS score {nihss_score} indicates moderate stroke. Close monitoring required.',
+                    patient=patient
+                )
+            
+            messages.success(request, f'Patient {patient.name} added successfully!')
+            # Redirect to dashboard instead of patient detail
+            return redirect('patientsystem:dashboard')
             
         except Exception as e:
             messages.error(request, f'Error adding patient: {str(e)}')
@@ -445,31 +464,142 @@ def consultations(request):
 @login_required
 @technician_required
 def edit_vitals(request, patient_id):
-    """Handle vital sign updates (technician only)"""
+    """Handle editing patient vitals (technician only)"""
     try:
         patient = get_object_or_404(Patient, id=patient_id)
         
         if request.method == 'POST':
             try:
                 # Update existing Vitals record
-                vitals = patient.vitals
-                vitals.blood_pressure = request.POST.get('blood_pressure')
-                vitals.heart_rate = int(request.POST.get('heart_rate'))
-                vitals.oxygen_saturation = float(request.POST.get('oxygen_saturation'))
-                vitals.temperature = float(request.POST.get('temperature'))
-                vitals.respiratory_rate = int(request.POST.get('respiratory_rate'))
-                vitals.blood_glucose = int(request.POST.get('blood_glucose')) if request.POST.get('blood_glucose') else None
-                vitals.save()
+                patient.vitals.blood_pressure = request.POST.get('blood_pressure')
+                patient.vitals.heart_rate = int(request.POST.get('heart_rate'))
+                patient.vitals.oxygen_saturation = float(request.POST.get('oxygen_saturation'))
+                patient.vitals.temperature = float(request.POST.get('temperature'))
                 
-                messages.success(request, 'Vital signs updated successfully')
+                # Optional fields
+                blood_glucose = request.POST.get('blood_glucose')
+                respiratory_rate = request.POST.get('respiratory_rate')
+                
+                if blood_glucose and blood_glucose.strip():
+                    patient.vitals.blood_glucose = int(blood_glucose)
+                
+                if respiratory_rate and respiratory_rate.strip():
+                    patient.vitals.respiratory_rate = int(respiratory_rate)
+                
+                # Save the vitals record
+                patient.vitals.save()
+                
+                # Recalculate NIHSS score
+                patient.nihss_score = patient.vitals.calculate_nihss()
+                patient.save()
+                
+                # Check for alerts based on the updated vitals
+                if patient.nihss_score >= 10:
+                    Alert.objects.create(
+                        type='critical',
+                        description=f'UPDATED VITALS: NIHSS score {patient.nihss_score} indicates major stroke. Immediate intervention required.',
+                        patient=patient
+                    )
+                elif patient.nihss_score >= 4:
+                    Alert.objects.create(
+                        type='warning',
+                        description=f'UPDATED VITALS: NIHSS score {patient.nihss_score} indicates moderate stroke. Close monitoring required.',
+                        patient=patient
+                    )
+                
+                messages.success(request, f'Vitals for {patient.name} updated successfully!')
                 return redirect('patientsystem:patient_detail', patient_id=patient_id)
                 
             except (ValueError, KeyError) as e:
                 messages.error(request, f'Error updating vitals: {str(e)}')
         
+        # GET request - display the form
         return render(request, 'patientsystem/edit_vitals.html', {
             'patient': patient
         })
     except Exception as e:
         messages.error(request, f'Error accessing vitals form: {str(e)}')
+        return redirect('patientsystem:dashboard')
+
+@login_required
+@neurologist_required
+def edit_consultation(request, consultation_id):
+    """Handle editing consultation data (neurologist only)"""
+    try:
+        consultation = get_object_or_404(Consultation, id=consultation_id)
+        patient = consultation.patient
+        
+        if request.method == 'POST':
+            try:
+                # Update consultation data
+                consultation.diagnosis = request.POST.get('diagnosis')
+                consultation.treatment_plan = request.POST.get('treatment_plan')
+                consultation.test_orders = request.POST.get('test_orders', '')
+                consultation.nihss_score = int(request.POST.get('nihss_score'))
+                
+                # Update TPA approval status
+                consultation.tpa_approved = request.POST.get('tpa_approved') == 'yes'
+                consultation.tpa_approval_notes = request.POST.get('tpa_approval_notes', '')
+                
+                # Save the consultation
+                consultation.save()
+                
+                # Update patient's NIHSS score if this is the most recent consultation
+                latest_consultation = patient.consultations.order_by('-date').first()
+                if latest_consultation and latest_consultation.id == consultation.id:
+                    patient.nihss_score = consultation.nihss_score
+                    patient.save()
+                
+                messages.success(request, f'Consultation for {patient.name} updated successfully!')
+                return redirect('patientsystem:patient_detail', patient_id=patient.id)
+                
+            except (ValueError, KeyError) as e:
+                messages.error(request, f'Error updating consultation: {str(e)}')
+        
+        # GET request - display the form
+        return render(request, 'patientsystem/edit_consultation.html', {
+            'consultation': consultation,
+            'patient': patient
+        })
+    except Exception as e:
+        messages.error(request, f'Error accessing consultation form: {str(e)}')
+        return redirect('patientsystem:dashboard')
+
+@login_required
+@technician_required
+def edit_patient(request, patient_id):
+    """Handle editing patient details (technician only)"""
+    try:
+        patient = get_object_or_404(Patient, id=patient_id)
+        
+        if request.method == 'POST':
+            try:
+                # Update patient information
+                patient.first_name = request.POST.get('first_name')
+                patient.last_name = request.POST.get('last_name')
+                patient.date_of_birth = request.POST.get('date_of_birth')
+                patient.gender = request.POST.get('gender')
+                patient.chief_complaint = request.POST.get('chief_complaint')
+                patient.address = request.POST.get('address')
+                patient.phone_number = request.POST.get('phone_number')
+                patient.emergency_contact = request.POST.get('emergency_contact')
+                patient.medical_history = request.POST.get('medical_history')
+                patient.current_medications = request.POST.get('current_medications')
+                patient.allergies = request.POST.get('allergies')
+                
+                # Save the patient record
+                patient.save()
+                
+                messages.success(request, f'Details for {patient.name} updated successfully!')
+                return redirect('patientsystem:patient_detail', patient_id=patient_id)
+                
+            except (ValueError, KeyError) as e:
+                messages.error(request, f'Error updating patient details: {str(e)}')
+        
+        # GET request - display the form
+        return render(request, 'patientsystem/edit_patient.html', {
+            'patient': patient
+        })
+    except Exception as e:
+        messages.error(request, f'Error accessing patient form: {str(e)}')
         return redirect('patientsystem:dashboard')

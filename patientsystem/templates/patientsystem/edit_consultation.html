@@ -1,0 +1,88 @@
+{% extends 'patientsystem/base.html' %}
+{% load static %}
+
+{% block title %}Edit Consultation - {{ patient.name }}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/consultation-form.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="consultation-form-container">
+        <div class="consultation-header">
+            <h2>Edit Consultation for {{ patient.name }}</h2>
+            <div class="patient-summary">
+                <div class="patient-detail"><strong>Age:</strong> {{ patient.age }}</div>
+                <div class="patient-detail"><strong>Gender:</strong> {{ patient.sex }}</div>
+                <div class="patient-detail"><strong>ID:</strong> {{ patient.hospital_id }}</div>
+                <div class="patient-detail"><strong>Date:</strong> {{ consultation.date|date:"F j, Y, g:i a" }}</div>
+            </div>
+        </div>
+
+        <form method="post" class="consultation-form">
+            {% csrf_token %}
+
+            <div class="form-section">
+                <h3>Diagnosis & Assessment</h3>
+                
+                <div class="form-group">
+                    <label for="nihss_score">NIHSS Score</label>
+                    <input type="number" id="nihss_score" name="nihss_score" class="form-control" 
+                           value="{{ consultation.nihss_score }}" min="0" max="42" required>
+                    <small class="text-muted">National Institutes of Health Stroke Scale (0-42)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="diagnosis">Diagnosis</label>
+                    <textarea id="diagnosis" name="diagnosis" class="form-control" rows="4" required>{{ consultation.diagnosis }}</textarea>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Treatment Plan</h3>
+                
+                <div class="form-group">
+                    <label for="treatment_plan">Treatment Plan</label>
+                    <textarea id="treatment_plan" name="treatment_plan" class="form-control" rows="4" required>{{ consultation.treatment_plan }}</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="test_orders">Test Orders</label>
+                    <textarea id="test_orders" name="test_orders" class="form-control" rows="3">{{ consultation.test_orders }}</textarea>
+                    <small class="text-muted">Optional - List any additional tests required</small>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>TPA Administration</h3>
+                
+                <div class="form-group">
+                    <label>TPA Approval Status</label>
+                    <div class="radio-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tpa_approved" id="tpa_yes" value="yes" {% if consultation.tpa_approved %}checked{% endif %}>
+                            <label class="form-check-label" for="tpa_yes">Approve TPA administration</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tpa_approved" id="tpa_no" value="no" {% if not consultation.tpa_approved %}checked{% endif %}>
+                            <label class="form-check-label" for="tpa_no">TPA is not recommended</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tpa_approval_notes">TPA Approval Notes</label>
+                    <textarea id="tpa_approval_notes" name="tpa_approval_notes" class="form-control" rows="3">{{ consultation.tpa_approval_notes }}</textarea>
+                    <small class="text-muted">Provide rationale for your TPA administration decision</small>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Update Consultation</button>
+                <a href="{% url 'patientsystem:patient_detail' patient.id %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

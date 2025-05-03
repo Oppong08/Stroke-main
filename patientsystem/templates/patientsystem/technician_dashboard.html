@@ -55,6 +55,14 @@
         background-color: #f0f8ff !important;
     }
     
+    .table-row-light {
+        background-color: #ffffff;
+    }
+    
+    .table-row-dark {
+        background-color: #f8f9fa;
+    }
+    
     .badge-male {
         background-color: #0d6efd;
         color: white;
@@ -127,6 +135,37 @@
     .bg-pink {
         background-color: #ff69b4 !important;
     }
+    
+    /* Search box styles */
+    .search-container {
+        position: relative;
+        width: 300px;
+        margin-bottom: 1rem;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 10px 15px 10px 40px;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        background-color: #f8fafc;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+        outline: none;
+    }
+    
+    .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
 </style>
 {% endblock %}
 
@@ -138,9 +177,15 @@
     
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="font-family: 'Poppins', sans-serif;">Patient List</h2>
-        <a href="{% url 'patientsystem:new_patient' %}" class="btn btn-primary" style="border-radius: 20px; padding: 8px 20px;">
-            <i class="fas fa-plus"></i> Add New Patient
-        </a>
+        <div class="d-flex">
+            <div class="search-container me-3">
+                <input type="text" class="search-input" id="patient-search" placeholder="Search patients...">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+            <a href="{% url 'patientsystem:new_patient' %}" class="btn btn-primary" style="border-radius: 20px; padding: 8px 20px;">
+                <i class="fas fa-plus"></i> Add New Patient
+            </a>
+        </div>
     </div>
 
     <div class="table-responsive">
@@ -151,6 +196,8 @@
                     <th>Name</th>
                     <th>Age</th>
                     <th>Sex</th>
+                    <th>NIHSS Score</th>
+                    <th>TPA Status</th>
                     <th>Chief Complaint</th>
                     <th>Last Updated</th>
                     <th>Actions</th>
@@ -158,13 +205,23 @@
             </thead>
             <tbody>
                 {% for patient in patients %}
-                <tr style="background-color: {% cycle 'white' '#f8f9fa' %};">
-                    <td>{{ patient.id }}</td>
-                    <td>{{ patient.name }}</td>
+                <tr class="{% cycle 'table-row-light' 'table-row-dark' %}">
+                    <td class="patient-id">{{ patient.id }}</td>
+                    <td class="patient-name">{{ patient.name }}</td>
                     <td>{{ patient.age }}</td>
                     <td>
-                        <span class="badge {% if patient.sex == 'M' %}bg-primary{% else %}bg-pink{% endif %}">
-                            {{ patient.get_sex_display }}
+                        <span class="badge {% if patient.gender == 'M' %}bg-primary{% elif patient.gender == 'F' %}bg-pink{% else %}bg-secondary{% endif %}">
+                            {{ patient.sex }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge {% if patient.nihss_score > 15 %}bg-danger{% elif patient.nihss_score > 10 %}bg-warning{% elif patient.nihss_score > 5 %}bg-info{% else %}bg-success{% endif %}">
+                            {{ patient.nihss_score }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge {% if patient.tpa_status == 'Approved' %}bg-success{% elif patient.tpa_status == 'Pending' %}bg-warning{% else %}bg-secondary{% endif %}">
+                            {{ patient.tpa_status }}
                         </span>
                     </td>
                     <td>
@@ -183,15 +240,63 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" class="text-center">No patients found.</td>
+                    <td colspan="9" class="text-center">No patients found.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+    
+    <!-- NIHSS Score Legend -->
+    <div class="card mt-4 mb-4">
+        <div class="card-header">
+            <h5>NIHSS Score Legend</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-3">
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-success me-2">0-5</span>
+                    <span>Minor Stroke</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-info me-2">6-10</span>
+                    <span>Moderate Stroke</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-warning me-2">11-15</span>
+                    <span>Moderate/Severe Stroke</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-danger me-2">16+</span>
+                    <span>Severe Stroke</span>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="{% static 'js/main.js' %}"></script>
+<script>
+    // Check if the page is loaded after redirecting from adding a patient
+    document.addEventListener("DOMContentLoaded", function() {
+        // If there's a success message, refresh after 500ms to ensure DB is fully updated
+        const alertMessages = document.querySelectorAll('.alert-success');
+        if (alertMessages.length > 0 && window.location.href.endsWith('dashboard/')) {
+            // Set the refresh flag in session storage
+            if (!sessionStorage.getItem('pageRefreshed')) {
+                sessionStorage.setItem('pageRefreshed', 'true');
+                // Refresh the page after a slight delay
+                setTimeout(function() {
+                    window.location.reload();
+                }, 500);
+            } else {
+                // Clear the flag after refresh
+                sessionStorage.removeItem('pageRefreshed');
+            }
+        }
+    });
+</script>
 {% endblock %} 

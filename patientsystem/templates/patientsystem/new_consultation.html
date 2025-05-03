@@ -176,6 +176,20 @@
                             <input type="text" class="form-control" id="relationship_to_patient" name="relationship_to_patient" required>
                         </div>
 
+                        <h5 class="mt-4">TPA Approval (Neurologist Decision)</h5>
+                        <div class="form-check form-check-inline mb-3">
+                            <input class="form-check-input" type="radio" name="tpa_approved" id="tpa_approved_yes" value="yes">
+                            <label class="form-check-label" for="tpa_approved_yes">Approve TPA Administration</label>
+                        </div>
+                        <div class="form-check form-check-inline mb-3">
+                            <input class="form-check-input" type="radio" name="tpa_approved" id="tpa_approved_no" value="no" checked>
+                            <label class="form-check-label" for="tpa_approved_no">Deny TPA Administration</label>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="tpa_approval_notes">TPA Decision Notes</label>
+                            <textarea class="form-control" id="tpa_approval_notes" name="tpa_approval_notes" rows="2" placeholder="Provide reasoning for approval or denial of TPA administration"></textarea>
+                        </div>
+
                         <div class="form-group mt-4">
                             <button type="submit" class="btn btn-primary">Submit Consultation</button>
                             <a href="{% url 'patientsystem:patient_detail' patient.id %}" class="btn btn-secondary">Cancel</a>

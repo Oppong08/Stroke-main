@@ -126,6 +126,7 @@
                                 <th>Age</th>
                                 <th>Sex</th>
                                 <th>NIHSS Score</th>
+                                <th>TPA Status</th>
                                 <th>Last Consultation</th>
                                 <th>Actions</th>
                             </tr>
@@ -137,7 +138,7 @@
                                 <td class="patient-name">{{ patient.name }}</td>
                                 <td>{{ patient.age }}</td>
                                 <td>
-                                    <span class="gender-badge {% if patient.sex == 'Male' %}male{% else %}female{% endif %}">
+                                    <span class="gender-badge {% if patient.gender == 'M' %}male{% elif patient.gender == 'F' %}female{% else %}other{% endif %}">
                                         {{ patient.sex }}
                                     </span>
                                 </td>
@@ -145,6 +146,11 @@
                                     <div class="nihss-score {% if patient.nihss_score > 15 %}critical{% elif patient.nihss_score > 5 %}warning{% else %}normal{% endif %}">
                                         {{ patient.nihss_score }}
                                     </div>
+                                </td>
+                                <td>
+                                    <span class="tpa-status {% if patient.tpa_status == 'Approved' %}approved{% elif patient.tpa_status == 'Not Approved' %}not-approved{% else %}no-data{% endif %}">
+                                        {{ patient.tpa_status }}
+                                    </span>
                                 </td>
                                 <td>{{ patient.nihss_last_updated|date:"Y-m-d H:i" }}</td>
                                 <td class="actions-cell">
@@ -175,4 +181,8 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/main.js' %}"></script>
 {% endblock %} 

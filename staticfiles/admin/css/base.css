@@ -5,8 +5,8 @@
 /* VARIABLE DEFINITIONS */
 html[data-theme="light"],
 :root {
-    --primary: #4aba91;
-    --secondary: #2f9f78;
+    --primary: #79aec8;
+    --secondary: #417690;
     --accent: #f5dd5d;
     --primary-fg: #fff;
 
@@ -20,12 +20,12 @@ html[data-theme="light"],
     --header-bg: var(--secondary);
     --header-link-color: var(--primary-fg);
 
-    --breadcrumbs-fg: #e6f3ef;
+    --breadcrumbs-fg: #c4dce8;
     --breadcrumbs-link-fg: var(--body-bg);
-    --breadcrumbs-bg: #2f9f78;
+    --breadcrumbs-bg: #264b5d;
 
-    --link-fg: #3d9d7c;
-    --link-hover-color: #2f9f78;
+    --link-fg: #417893;
+    --link-hover-color: #036;
     --link-selected-fg: var(--secondary);
 
     --hairline-color: #e8e8e8;

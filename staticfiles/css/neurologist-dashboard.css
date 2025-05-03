@@ -454,6 +454,33 @@
     color: var(--success-color);
 }
 
+/* TPA Status Styling */
+.tpa-status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.tpa-status.approved {
+    background-color: rgba(74, 186, 145, 0.15);
+    color: var(--success-color);
+    border: 1px solid var(--success-color);
+}
+
+.tpa-status.not-approved {
+    background-color: rgba(220, 53, 69, 0.15);
+    color: var(--danger-color);
+    border: 1px solid var(--danger-color);
+}
+
+.tpa-status.no-data {
+    background-color: rgba(108, 117, 125, 0.15);
+    color: #6c757d;
+    border: 1px solid #6c757d;
+}
+
 .actions-cell {
     width: 100px;
 }
