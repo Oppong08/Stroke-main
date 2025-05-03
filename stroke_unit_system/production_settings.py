@@ -1,4 +1,5 @@
 import os
+import dj_database_url
 from settings import *
 
 # Security settings
@@ -13,17 +14,20 @@ ALLOWED_HOSTS.extend(['localhost', '127.0.0.1'])
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-secret-key-here')  # Replace with a secure key
 
-# Database settings
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', ''),
-        'USER': os.environ.get('DB_USER', ''),
-        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
+# Database settings - Use DATABASE_URL from environment
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL)
     }
-}
+else:
+    # Fallback database config for local development
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 # Static files
 STATIC_URL = '/static/'
