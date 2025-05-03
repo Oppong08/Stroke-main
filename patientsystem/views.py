@@ -6,6 +6,8 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from datetime import datetime
 from .models import Patient, Consultation, Alert, Vitals, UserProfile, LabResults, ImagingStudy, RecentEvents, Consent, CTScanImage
 from .decorators import technician_required, neurologist_required
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.http import JsonResponse
 
 @login_required
 def dashboard(request):
@@ -168,6 +170,17 @@ def custom_logout(request):
     """Custom logout view to handle both GET and POST requests"""
     logout(request)
     return redirect('login')
+
+@ensure_csrf_cookie
+def csrf_debug(request):
+    """View to debug CSRF token issues"""
+    if request.method == 'POST':
+        return JsonResponse({
+            'success': True,
+            'message': 'CSRF token is valid!',
+            'post_data': dict(request.POST)
+        })
+    return render(request, 'csrf_debug.html')
 
 @login_required
 @technician_required
@@ -467,6 +480,7 @@ def register(request):
     
     return render(request, 'registration/register.html', {'form': form})
 
+@ensure_csrf_cookie
 def custom_login(request):
     """Custom login view to handle role selection"""
     if request.method == 'POST':

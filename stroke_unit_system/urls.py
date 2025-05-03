@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from patientsystem.views import custom_logout, register, custom_login
+from patientsystem.views import custom_logout, register, custom_login, csrf_debug
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -27,6 +27,7 @@ urlpatterns = [
     path('login/', custom_login, name='login'),
     path('register/', register, name='register'),
     path('logout/', custom_logout, name='logout'),
+    path('csrf-debug/', csrf_debug, name='csrf_debug'),
 ]
 
 # Add this to serve media files during development

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CSRF Debug - Stroke Unit System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h4 class="mb-0">CSRF Token Debug</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h5>Your CSRF Token:</h5>
+                        <code>{{ csrf_token }}</code>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Test Form:</h5>
+                        <form method="post" id="csrf-test-form">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <input type="text" name="test_field" class="form-control" value="Testing CSRF">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Test CSRF</button>
+                        </form>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Response:</h5>
+                        <pre id="response" class="p-3 bg-light">No response yet</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('csrf-test-form');
+    const responseDiv = document.getElementById('response');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        fetch(window.location.href, {
+            method: 'POST',
+            body: new FormData(form),
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            responseDiv.textContent = JSON.stringify(data, null, 2);
+        })
+        .catch(error => {
+            responseDiv.textContent = 'Error: ' + error;
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %} 

@@ -38,9 +38,14 @@ CSRF_TRUSTED_ORIGINS = [
 
 # Security Settings
 CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
-CSRF_COOKIE_HTTPONLY = False  # Set to True in production
-CSRF_USE_SESSIONS = False  # Set to True in production
+CSRF_COOKIE_HTTPONLY = False
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+CSRF_USE_SESSIONS = True  # Store CSRF token in the session instead of a cookie
 CSRF_COOKIE_DOMAIN = None  # Set to your domain in production
+
+# Session settings
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
 
 # Application definition
 
